@@ -1,9 +1,11 @@
 package deck
 
+// Deck represents a standard deck of playing cards.
 type Deck struct {
 	Cards
 }
 
+// New creates a new standard deck of 52 playing cards.
 func New() Deck {
 	deck := Deck{
 		Cards: Cards{Cards: []Card{}},

@@ -2,6 +2,7 @@ package deck
 
 import "math/rand/v2"
 
+// Suit represents the suit of a card in a standard deck.
 type Suit string
 
 const (
@@ -11,6 +12,7 @@ const (
 	Spades   Suit = "Spades"
 )
 
+// Rank represents the rank of a card in a standard deck.
 type Rank string
 
 const (
@@ -29,21 +31,25 @@ const (
 	Ace   Rank = "Ace"
 )
 
+// Card represents a single playing card with a rank and suit.
 type Card struct {
 	Rank Rank
 	Suit Suit
 }
 
+// Cards represents a collection of playing cards.
 type Cards struct {
 	Cards []Card
 }
 
+// Shuffle randomly shuffles the cards in the collection.
 func (c *Cards) Shuffle() {
 	rand.Shuffle(len(c.Cards), func(i, j int) {
 		c.Cards[i], c.Cards[j] = c.Cards[j], c.Cards[i]
 	})
 }
 
+// Deal removes and returns the top card from the collection.
 func (c *Cards) Deal() (Card, bool) {
 	if len(c.Cards) == 0 {
 		return Card{}, false
