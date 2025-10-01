@@ -76,6 +76,20 @@ customManager := &MyCustomChipManager{...}
 player := NewPlayerWithChipManager("Bob", customManager)
 ```
 
+#### Adding Players to Game
+
+```go
+// Create a new game
+game := New(6) // 6-deck shoe
+
+// Add player with default chip manager
+game.AddPlayer("Alice", 1000)
+
+// Add player with custom chip manager
+customManager := &MyCustomChipManager{...}
+game.AddPlayerWithChipManager("Bob", 500, customManager)
+```
+
 ## How to Play
 
 1. **Setup**: Add players with starting chip amounts

@@ -54,8 +54,8 @@ func New(numDecks int) *Game {
 }
 
 // AddPlayer adds a player to the game
-func (bg *Game) AddPlayer(name string, chips int) {
-	player := NewPlayer(name, chips)
+func (bg *Game) AddPlayer(name string, chips int, options ...Option) {
+	player := NewPlayer(name, chips, options...)
 	bg.players = append(bg.players, player)
 }
 
