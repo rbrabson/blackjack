@@ -164,7 +164,7 @@ Play another round? (y/n):
 
 ## Split Example
 
-```
+``` sh
 🎮 Charlie's turn:
 Charlie: [8♠, 8♥] (Value: 16)
 Choose action: (h)it, (s)tand, (d)ouble down, s(p)lit: p
