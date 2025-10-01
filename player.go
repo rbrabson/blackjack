@@ -7,54 +7,6 @@ import (
 	"github.com/rbrabson/cards"
 )
 
-// ChipManager interface defines the operations for managing player chips
-type ChipManager interface {
-	GetChips() int
-	SetChips(amount int)
-	AddChips(amount int)
-	DeductChips(amount int) error
-	HasEnoughChips(amount int) bool
-}
-
-// DefaultChipManager implements ChipManager with simple integer-based chip management
-type DefaultChipManager struct {
-	chips int
-}
-
-// NewDefaultChipManager creates a new default chip manager with the given initial amount
-func NewDefaultChipManager(initialChips int) *DefaultChipManager {
-	return &DefaultChipManager{chips: initialChips}
-}
-
-// GetChips returns the current chip count
-func (c *DefaultChipManager) GetChips() int {
-	return c.chips
-}
-
-// SetChips sets the chip count to the specified amount
-func (c *DefaultChipManager) SetChips(amount int) {
-	c.chips = amount
-}
-
-// AddChips adds the specified amount to the chip count
-func (c *DefaultChipManager) AddChips(amount int) {
-	c.chips += amount
-}
-
-// DeductChips removes the specified amount from the chip count
-func (c *DefaultChipManager) DeductChips(amount int) error {
-	if amount > c.chips {
-		return fmt.Errorf("insufficient chips: have %d, need %d", c.chips, amount)
-	}
-	c.chips -= amount
-	return nil
-}
-
-// HasEnoughChips returns true if there are enough chips for the specified amount
-func (c *DefaultChipManager) HasEnoughChips(amount int) bool {
-	return c.chips >= amount
-}
-
 // Player represents a blackjack player
 type Player struct {
 	name           string
@@ -65,33 +17,41 @@ type Player struct {
 	currentHandIdx int
 }
 
-// NewPlayer creates a new player with the given name and initial chips
-func NewPlayer(name string, chips int) *Player {
-	return &Player{
+func NewPlayer(name string, chips int, options ...Option) *Player {
+	player := &Player{
 		name:           name,
 		hands:          []Hand{*NewHand()},
-		chipManager:    NewDefaultChipManager(chips),
+		chipManager:    NewDefaultChipManager(0),
 		bet:            0,
 		active:         true,
 		currentHandIdx: 0,
 	}
+	for _, option := range options {
+		option(player)
+	}
+	player.chipManager.SetChips(chips)
+	return player
 }
 
-// NewPlayerWithChipManager creates a new player with a custom chip manager
-func NewPlayerWithChipManager(name string, chipManager ChipManager) *Player {
-	return &Player{
-		name:           name,
-		hands:          []Hand{*NewHand()},
-		chipManager:    chipManager,
-		bet:            0,
-		active:         true,
-		currentHandIdx: 0,
-	}
-}
+// Option is a function that modifies a message.
+type Option func(*Player)
 
 // Name returns the player's name
 func (p *Player) Name() string {
 	return p.name
+}
+
+func WithChipManager(cm ChipManager) Option {
+	return func(p *Player) {
+		p.chipManager = cm
+	}
+}
+
+// WithAllowedMentions sets the allowed mentions for the message.
+func WithChips(chips int) Option {
+	return func(p *Player) {
+		p.chipManager.SetChips(chips)
+	}
 }
 
 // Hand returns all of the player's hands

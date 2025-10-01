@@ -15,7 +15,7 @@ func TestChipManagerInterface(t *testing.T) {
 
 	// Test with custom chip manager
 	customChipManager := NewDefaultChipManager(500)
-	player2 := NewPlayerWithChipManager("Player2", customChipManager)
+	player2 := NewPlayer("Player2", 500, WithChipManager(customChipManager))
 	if player2.Chips() != 500 {
 		t.Errorf("Expected 500 chips, got %d", player2.Chips())
 	}
@@ -78,7 +78,10 @@ func (t *TrackingChipManager) HasEnoughChips(amount int) bool {
 // TestCustomChipManager demonstrates creating a custom chip manager implementation
 func TestCustomChipManager(t *testing.T) {
 	trackingManager := &TrackingChipManager{chips: 1000, operationCount: 0}
-	player := NewPlayerWithChipManager("TrackingPlayer", trackingManager)
+	player := NewPlayer("TrackingPlayer", 1000, WithChipManager(trackingManager))
+
+	// Reset operation count after player creation since NewPlayer calls SetChips
+	trackingManager.operationCount = 0
 
 	// Place a bet (should increment operation count)
 	err := player.PlaceBet(100)
