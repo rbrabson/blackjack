@@ -53,6 +53,29 @@ A comprehensive console-based blackjack game written in Go, featuring a dealer, 
 - Tracks game statistics and round progression
 - Manages game state and player turns
 
+### 💰 Chip Management
+
+The game uses an abstracted chip management system through the `ChipManager` interface, allowing for flexible chip handling:
+
+- **Interface-Based Design**: Players use a `ChipManager` interface for all chip operations
+- **Default Implementation**: `DefaultChipManager` provides standard integer-based chip management
+- **Extensible**: Custom chip managers can be implemented for advanced features like:
+  - Transaction logging
+  - Different currencies or chip types
+  - External banking systems
+  - Audit trails and analytics
+
+#### Creating Players
+
+```go
+// Using default chip manager (recommended for most cases)
+player := NewPlayer("Alice", 1000)
+
+// Using custom chip manager
+customManager := &MyCustomChipManager{...}
+player := NewPlayerWithChipManager("Bob", customManager)
+```
+
 ## How to Play
 
 1. **Setup**: Add players with starting chip amounts

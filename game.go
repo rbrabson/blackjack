@@ -342,7 +342,9 @@ func (bg *Game) PayoutResults() {
 		}
 
 		// Apply the net result
-		player.chips += totalWinnings
+		if totalWinnings != 0 {
+			player.AddChips(totalWinnings)
+		}
 		player.bet = 0 // Clear the bet
 	}
 }
