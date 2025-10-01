@@ -2,8 +2,6 @@ package blackjack
 
 import (
 	"fmt"
-	"math/rand"
-	"time"
 
 	"github.com/rbrabson/cards"
 )
@@ -61,7 +59,6 @@ func (bs *BlackjackShoe) CardsRemaining() int {
 // Reshuffle creates a new shuffled shoe with the same number of decks
 func (bs *BlackjackShoe) Reshuffle() {
 	bs.shoe = cards.NewShoe(bs.numDecks)
-	rand.Seed(time.Now().UnixNano())
 	bs.shoe.Shuffle()
 
 	// Reset cut card position

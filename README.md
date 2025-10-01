@@ -11,6 +11,7 @@ A comprehensive console-based blackjack game written in Go, featuring a dealer, 
   - Blackjack pays 3:2
   - Dealer hits on soft 17
   - Double down on any two cards
+  - Split pairs (including multiple splits)
   - Standard hand evaluation with proper Ace handling
 - **Interactive Gameplay**: Console-based interface with clear prompts and game state display
 - **Betting System**: Chip-based betting with win/loss tracking
@@ -26,8 +27,8 @@ A comprehensive console-based blackjack game written in Go, featuring a dealer, 
 
 ### 👤 Player
 
-- Manages individual hands, chips, and bets
-- Supports hit, stand, and double down actions
+- Manages multiple hands (for splits), chips, and bets
+- Supports hit, stand, double down, and split actions
 - Tracks active/inactive status during rounds
 - Handles win/loss payouts
 
@@ -61,6 +62,7 @@ A comprehensive console-based blackjack game written in Go, featuring a dealer, 
    - **Hit**: Take another card
    - **Stand**: Keep current hand
    - **Double Down**: Double the bet and take exactly one more card (if eligible)
+   - **Split**: If dealt a pair, split into two separate hands with separate bets
 5. **Dealer Play**: Dealer reveals hole card and hits according to rules
 6. **Payouts**: Winners are paid according to standard blackjack payouts
 
@@ -81,6 +83,10 @@ go build
 - **Dealer Rules**: Must hit on 16 or less, stand on 17 or more
 - **Soft 17**: Dealer hits on soft 17 (Ace + 6)
 - **Double Down**: Available on any two cards if you have sufficient chips
+- **Split**: Available when dealt a pair (two cards of same rank)
+  - Each split hand gets a separate bet equal to the original bet
+  - Split hands cannot achieve "natural" blackjack (still pays 1:1)
+  - Can continue to hit, stand, or double down on each split hand
 - **Winning**: Beat dealer without busting, or dealer busts
 
 ## Dependencies
@@ -154,6 +160,34 @@ Bob: Player Blackjack!
   Chips: 512
 
 Play another round? (y/n):
+```
+
+## Split Example
+
+```
+🎮 Charlie's turn:
+Charlie: [8♠, 8♥] (Value: 16)
+Choose action: (h)it, (s)tand, (d)ouble down, s(p)lit: p
+Hand split! You now have 2 hands.
+Current hand: [8♠, 3♦] (Value: 11)
+
+Charlie - Hand 1 of 2: [8♠, 3♦] (Value: 11) (Split)
+Choose action: (h)it, (s)tand, (d)ouble down: h
+Drew: [8♠, 3♦, 7♣] (Value: 18) (Split)
+Standing on hand.
+
+Charlie - Hand 2 of 2: [8♥, K♠] (Value: 18) (Split)
+Choose action: (h)it, (s)tand: s
+Standing on hand.
+
+✅ Charlie finished all hands.
+
+💰 Round Results:
+================
+Charlie:
+  Hand 1: Player Wins
+  Hand 2: Player Wins
+  Final Chips: 1100
 ```
 
 Enjoy playing blackjack! 🎉

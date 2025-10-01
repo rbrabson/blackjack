@@ -203,80 +203,137 @@ func playerTurns(game *blackjack.Game) {
 
 		fmt.Printf("\n🎮 %s's turn:\n", player.Name())
 
-		// Check for player blackjack
-		if player.Hand().IsBlackjack() {
-			fmt.Printf("🎯 %s has blackjack!\n", player.Name())
-			continue
-		}
+		// Handle all hands for this player (including splits)
+		for player.HasActiveHands() {
+			currentHand := player.CurrentHand()
 
-		// Player actions
-		for !player.IsStanding() {
-			fmt.Printf("\n%s: %s\n", player.Name(), player.Hand().String())
-			fmt.Print("Choose action: (h)it, (s)tand")
-
-			if player.CanDoubleDown() {
-				fmt.Print(", (d)ouble down")
-			}
-
-			fmt.Print(": ")
-			scanner.Scan()
-			action := strings.ToLower(strings.TrimSpace(scanner.Text()))
-
-			switch action {
-			case "h", "hit":
-				err := game.PlayerHit(player.Name())
-				if err != nil {
-					fmt.Printf("Error: %v\n", err)
-					continue
-				}
-
-				fmt.Printf("Drew: %s\n", player.Hand().String())
-
-				if player.Hand().IsBusted() {
-					fmt.Printf("💥 %s busted!\n", player.Name())
+			// Check for player blackjack
+			if currentHand.IsBlackjack() {
+				fmt.Printf("🎯 %s has blackjack on hand %d!\n", player.Name(), player.GetCurrentHandIndex()+1)
+				if !player.MoveToNextActiveHand() {
 					player.SetActive(false)
+					break
+				}
+				continue
+			}
+
+			// Show current hand status
+			if len(player.Hands()) > 1 {
+				fmt.Printf("\n%s - Hand %d of %d: %s\n",
+					player.Name(),
+					player.GetCurrentHandIndex()+1,
+					len(player.Hands()),
+					currentHand.String())
+			} else {
+				fmt.Printf("\n%s: %s\n", player.Name(), currentHand.String())
+			}
+
+			// Player actions for current hand
+			for currentHand.IsActive() && !currentHand.IsBusted() && !currentHand.IsBlackjack() {
+				fmt.Print("Choose action: (h)it, (s)tand")
+
+				if player.CanDoubleDown() {
+					fmt.Print(", (d)ouble down")
 				}
 
-			case "s", "stand":
-				fmt.Printf("%s stands.\n", player.Name())
-				player.SetActive(false)
-
-			case "d", "double", "double down":
-				if !player.CanDoubleDown() {
-					fmt.Println("Cannot double down.")
-					continue
+				if player.CanSplit() {
+					fmt.Print(", (p)lit")
 				}
 
-				err := player.DoubleDown()
-				if err != nil {
-					fmt.Printf("Error: %v\n", err)
-					continue
+				fmt.Print(": ")
+				scanner.Scan()
+				action := strings.ToLower(strings.TrimSpace(scanner.Text()))
+
+				switch action {
+				case "h", "hit":
+					err := game.PlayerHit(player.Name())
+					if err != nil {
+						fmt.Printf("Error: %v\n", err)
+						continue
+					}
+
+					fmt.Printf("Drew: %s\n", currentHand.String())
+
+					if currentHand.IsBusted() {
+						fmt.Printf("💥 Hand busted!\n")
+						currentHand.SetActive(false)
+					}
+
+				case "s", "stand":
+					fmt.Printf("Standing on hand.\n")
+					err := game.PlayerStand(player.Name())
+					if err != nil {
+						fmt.Printf("Error: %v\n", err)
+						continue
+					}
+
+				case "d", "double", "double down":
+					if !player.CanDoubleDown() {
+						fmt.Println("Cannot double down.")
+						continue
+					}
+
+					err := player.DoubleDown()
+					if err != nil {
+						fmt.Printf("Error: %v\n", err)
+						continue
+					}
+
+					err = game.PlayerHit(player.Name())
+					if err != nil {
+						fmt.Printf("Error: %v\n", err)
+						continue
+					}
+
+					fmt.Printf("Doubled down! Drew: %s\n", currentHand.String())
+
+					if currentHand.IsBusted() {
+						fmt.Printf("💥 Hand busted!\n")
+					}
+
+					// Double down ends the hand
+					err = game.PlayerStand(player.Name())
+					if err != nil {
+						fmt.Printf("Error: %v\n", err)
+					}
+
+				case "p", "split":
+					if !player.CanSplit() {
+						fmt.Println("Cannot split.")
+						continue
+					}
+
+					err := game.PlayerSplit(player.Name())
+					if err != nil {
+						fmt.Printf("Error: %v\n", err)
+						continue
+					}
+
+					fmt.Printf("Hand split! You now have %d hands.\n", len(player.Hands()))
+					// Show current hand after split
+					fmt.Printf("Current hand: %s\n", currentHand.String())
+
+				default:
+					fmt.Println("Invalid action. Please choose (h)it, (s)tand, (d)ouble down, or s(p)lit if available.")
 				}
+			}
 
-				err = game.PlayerHit(player.Name())
-				if err != nil {
-					fmt.Printf("Error: %v\n", err)
-					continue
+			// Move to next hand if current hand is done
+			if !currentHand.IsActive() {
+				if !player.MoveToNextActiveHand() {
+					player.SetActive(false)
+					break
 				}
-
-				fmt.Printf("Doubled down! Drew: %s\n", player.Hand().String())
-
-				if player.Hand().IsBusted() {
-					fmt.Printf("💥 %s busted!\n", player.Name())
-				}
-
-				player.SetActive(false)
-
-			default:
-				fmt.Println("Invalid action. Please choose (h)it, (s)tand, or (d)ouble down if available.")
 			}
 		}
+
+		fmt.Printf("✅ %s finished all hands.\n", player.Name())
 	}
 }
 
 func hasActiveNonBustedPlayers(game *blackjack.Game) bool {
 	for _, player := range game.Players() {
-		if player.Bet() > 0 && !player.Hand().IsBusted() {
+		if player.Bet() > 0 && !player.CurrentHand().IsBusted() {
 			return true
 		}
 	}
@@ -292,9 +349,24 @@ func showRoundResults(game *blackjack.Game) {
 			continue
 		}
 
-		result := game.EvaluateHand(player)
-		fmt.Printf("%s: %s\n", player.Name(), result.String())
-		fmt.Printf("  Chips: %d\n", player.Chips())
+		hands := player.Hands()
+		if len(hands) == 1 {
+			// Single hand
+			result := game.EvaluateHand(player)
+			fmt.Printf("%s: %s\n", player.Name(), result.String())
+		} else {
+			// Multiple hands (splits)
+			fmt.Printf("%s:\n", player.Name())
+			for i := 0; i < len(hands); i++ {
+				// Temporarily set current hand for evaluation
+				originalHandIdx := player.GetCurrentHandIndex()
+				player.SetCurrentHandIndex(i)
+				result := game.EvaluateHand(player)
+				fmt.Printf("  Hand %d: %s\n", i+1, result.String())
+				player.SetCurrentHandIndex(originalHandIdx)
+			}
+		}
+		fmt.Printf("  Final Chips: %d\n", player.Chips())
 	}
 }
 

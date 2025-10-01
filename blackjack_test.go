@@ -187,3 +187,202 @@ func ExampleGame() {
 	// Chips: 450
 	// Bet: 50
 }
+
+func TestHandSplit(t *testing.T) {
+	// Test basic split functionality
+	hand := NewHand()
+	hand.AddCard(cards.Card{Suit: cards.Hearts, Rank: cards.Eight})
+	hand.AddCard(cards.Card{Suit: cards.Spades, Rank: cards.Eight})
+
+	if !hand.CanSplit() {
+		t.Error("Should be able to split pair of eights")
+	}
+
+	// Split the hand
+	newHand := hand.SplitHand()
+	if newHand == nil {
+		t.Fatal("Split should have returned a new hand")
+	}
+
+	// Check original hand
+	if hand.Count() != 1 {
+		t.Errorf("Original hand should have 1 card, got %d", hand.Count())
+	}
+	if !hand.IsSplit() {
+		t.Error("Original hand should be marked as split")
+	}
+
+	// Check new hand
+	if newHand.Count() != 1 {
+		t.Errorf("New hand should have 1 card, got %d", newHand.Count())
+	}
+	if !newHand.IsSplit() {
+		t.Error("New hand should be marked as split")
+	}
+
+	// Split hands cannot have blackjack
+	hand.AddCard(cards.Card{Suit: cards.Clubs, Rank: cards.Ace})
+	if hand.IsBlackjack() {
+		t.Error("Split hand should not be considered blackjack")
+	}
+}
+
+func TestPlayerSplit(t *testing.T) {
+	player := NewPlayer("TestPlayer", 1000)
+	player.PlaceBet(100)
+
+	// Add pair of kings
+	player.Hit(cards.Card{Suit: cards.Hearts, Rank: cards.King})
+	player.Hit(cards.Card{Suit: cards.Spades, Rank: cards.King})
+
+	if !player.CanSplit() {
+		t.Error("Should be able to split pair of kings")
+	}
+
+	// Split the hand
+	err := player.Split()
+	if err != nil {
+		t.Fatalf("Split failed: %v", err)
+	}
+
+	// Check player state after split
+	hands := player.Hands()
+	if len(hands) != 2 {
+		t.Errorf("Expected 2 hands after split, got %d", len(hands))
+	}
+
+	// Check chips (should be reduced by bet amount)
+	if player.Chips() != 800 { // 1000 - 100 (initial bet) - 100 (split bet)
+		t.Errorf("Expected 800 chips after split, got %d", player.Chips())
+	}
+
+	// Test multiple hand navigation
+	if player.GetCurrentHandIndex() != 0 {
+		t.Error("Should start with first hand")
+	}
+
+	if !player.NextHand() {
+		t.Error("Should be able to move to next hand")
+	}
+
+	if player.GetCurrentHandIndex() != 1 {
+		t.Error("Should be on second hand after NextHand")
+	}
+}
+
+func TestGameSplit(t *testing.T) {
+	game := New(1)
+	game.AddPlayer("TestPlayer", 1000)
+	player := game.GetPlayer("TestPlayer")
+
+	// Start a new round
+	game.StartNewRound()
+	player.PlaceBet(100)
+
+	// Manually set up a split scenario
+	player.Hit(cards.Card{Suit: cards.Hearts, Rank: cards.Nine})
+	player.Hit(cards.Card{Suit: cards.Spades, Rank: cards.Nine})
+
+	// Test game split method
+	err := game.PlayerSplit("TestPlayer")
+	if err != nil {
+		t.Fatalf("Game split failed: %v", err)
+	}
+
+	hands := player.Hands()
+	if len(hands) != 2 {
+		t.Errorf("Expected 2 hands after game split, got %d", len(hands))
+	}
+
+	// Each hand should have 2 cards after split (original + dealt card)
+	for i, hand := range hands {
+		if hand.Count() != 2 {
+			t.Errorf("Hand %d should have 2 cards after split, got %d", i, hand.Count())
+		}
+	}
+}
+
+func TestSplitBetting(t *testing.T) {
+	game := New(1)
+	game.AddPlayer("TestPlayer", 1000)
+	player := game.GetPlayer("TestPlayer")
+
+	game.StartNewRound()
+	player.PlaceBet(100)
+
+	// Set up split scenario
+	player.Hit(cards.Card{Suit: cards.Hearts, Rank: cards.Seven})
+	player.Hit(cards.Card{Suit: cards.Spades, Rank: cards.Seven})
+
+	game.PlayerSplit("TestPlayer")
+
+	// Simulate game results for split hands
+	game.PayoutResults()
+
+	// The exact result depends on what cards were dealt and dealer's hand
+	// But we can verify the betting structure is correct
+	if player.Bet() != 0 {
+		t.Error("Bet should be cleared after payout")
+	}
+}
+
+func TestSplitLimitations(t *testing.T) {
+	hand := NewHand()
+
+	// Can't split with different ranks
+	hand.AddCard(cards.Card{Suit: cards.Hearts, Rank: cards.King})
+	hand.AddCard(cards.Card{Suit: cards.Spades, Rank: cards.Queen})
+	if hand.CanSplit() {
+		t.Error("Should not be able to split different ranks")
+	}
+
+	// Can't split with one card
+	hand.Clear()
+	hand.AddCard(cards.Card{Suit: cards.Hearts, Rank: cards.Ace})
+	if hand.CanSplit() {
+		t.Error("Should not be able to split with one card")
+	}
+
+	// Can't split with three cards
+	hand.AddCard(cards.Card{Suit: cards.Spades, Rank: cards.Ace})
+	hand.AddCard(cards.Card{Suit: cards.Clubs, Rank: cards.Five})
+	if hand.CanSplit() {
+		t.Error("Should not be able to split with three cards")
+	}
+}
+
+func TestPlayerSplitInsufficientChips(t *testing.T) {
+	player := NewPlayer("TestPlayer", 100)
+	player.PlaceBet(100) // All chips
+
+	// Add pair of aces
+	player.Hit(cards.Card{Suit: cards.Hearts, Rank: cards.Ace})
+	player.Hit(cards.Card{Suit: cards.Spades, Rank: cards.Ace})
+
+	// Should not be able to split due to insufficient chips
+	if player.CanSplit() {
+		t.Error("Should not be able to split with insufficient chips")
+	}
+
+	err := player.Split()
+	if err == nil {
+		t.Error("Split should fail with insufficient chips")
+	}
+}
+
+func TestSplitExample(t *testing.T) {
+	player := NewPlayer("Alice", 1000)
+	player.PlaceBet(50)
+
+	// Deal a pair of eights
+	player.Hit(cards.Card{Suit: cards.Hearts, Rank: cards.Eight})
+	player.Hit(cards.Card{Suit: cards.Spades, Rank: cards.Eight})
+
+	fmt.Printf("Before split: %d hands\n", len(player.Hands()))
+	fmt.Printf("Can split: %t\n", player.CanSplit())
+
+	player.Split()
+
+	fmt.Printf("After split: %d hands\n", len(player.Hands()))
+	fmt.Printf("Chips after split: %d\n", player.Chips())
+}

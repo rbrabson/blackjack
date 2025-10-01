@@ -201,6 +201,68 @@ func (bg *Game) PlayerHit(playerName string) error {
 	return nil
 }
 
+// PlayerSplit handles a player splitting their hand
+func (bg *Game) PlayerSplit(playerName string) error {
+	player := bg.GetPlayer(playerName)
+	if player == nil {
+		return fmt.Errorf("player %s not found", playerName)
+	}
+
+	if !player.IsActive() {
+		return fmt.Errorf("player %s is not active", playerName)
+	}
+
+	if !player.CanSplit() {
+		return fmt.Errorf("player %s cannot split", playerName)
+	}
+
+	// Split the hand
+	err := player.Split()
+	if err != nil {
+		return fmt.Errorf("failed to split hand: %w", err)
+	}
+
+	// Deal a second card to each of the split hands
+	hands := player.Hands()
+	for i := len(hands) - 2; i < len(hands); i++ { // Last two hands are the split hands
+		card, err := bg.shoe.Draw()
+		if err != nil {
+			return fmt.Errorf("failed to deal card to split hand: %w", err)
+		}
+
+		// Temporarily set the hand to add the card
+		originalHandIdx := player.GetCurrentHandIndex()
+		player.SetCurrentHandIndex(i)
+		player.Hit(card)
+		player.SetCurrentHandIndex(originalHandIdx)
+	}
+
+	return nil
+}
+
+// PlayerStand handles a player standing on their current hand
+func (bg *Game) PlayerStand(playerName string) error {
+	player := bg.GetPlayer(playerName)
+	if player == nil {
+		return fmt.Errorf("player %s not found", playerName)
+	}
+
+	if !player.IsActive() {
+		return fmt.Errorf("player %s is not active", playerName)
+	}
+
+	// Stand on current hand
+	player.CurrentHand().Stand()
+
+	// Move to next active hand if available
+	if !player.MoveToNextActiveHand() {
+		// No more active hands, player is done
+		player.SetActive(false)
+	}
+
+	return nil
+}
+
 // DealerPlay handles the dealer's turn according to blackjack rules
 func (bg *Game) DealerPlay() error {
 	for bg.dealer.ShouldHit() {
@@ -215,36 +277,25 @@ func (bg *Game) DealerPlay() error {
 
 // EvaluateHand determines the result of a player's hand against the dealer
 func (bg *Game) EvaluateHand(player *Player) GameResult {
-	playerHand := player.Hand()
+	playerHand := player.CurrentHand()
 	dealerHand := bg.dealer.Hand()
 
-	// Check for blackjacks first
 	playerBlackjack := playerHand.IsBlackjack()
 	dealerBlackjack := dealerHand.IsBlackjack()
-
-	if playerBlackjack && dealerBlackjack {
-		return Push
-	}
-	if playerBlackjack {
-		return PlayerBlackjack
-	}
-	if dealerBlackjack {
-		return DealerBlackjack
-	}
-
-	// Check for busts
-	if playerHand.IsBusted() {
-		return DealerWin
-	}
-	if dealerHand.IsBusted() {
-		return PlayerWin
-	}
-
-	// Compare values
 	playerValue := playerHand.Value()
 	dealerValue := dealerHand.Value()
 
 	switch {
+	case playerBlackjack && dealerBlackjack:
+		return Push
+	case playerBlackjack:
+		return PlayerBlackjack
+	case dealerBlackjack:
+		return DealerBlackjack
+	case playerHand.IsBusted():
+		return DealerWin
+	case dealerHand.IsBusted():
+		return PlayerWin
 	case playerValue > dealerValue:
 		return PlayerWin
 	case dealerValue > playerValue:
@@ -261,17 +312,38 @@ func (bg *Game) PayoutResults() {
 			continue
 		}
 
-		result := bg.EvaluateHand(player)
-		switch result {
-		case PlayerWin:
-			player.WinBet(1.0) // 1:1 payout
-		case PlayerBlackjack:
-			player.WinBet(1.5) // 3:2 payout
-		case Push:
-			player.PushBet()
-		case DealerWin, DealerBlackjack:
-			player.LoseBet()
+		// Handle each hand separately
+		totalWinnings := 0
+		totalBets := 0
+		hands := player.Hands()
+
+		for handIdx := 0; handIdx < len(hands); handIdx++ {
+			// Temporarily set current hand for evaluation
+			originalHandIdx := player.GetCurrentHandIndex()
+			player.SetCurrentHandIndex(handIdx)
+
+			result := bg.EvaluateHand(player)
+			betAmount := player.Bet() // Each split hand has the same bet amount
+			totalBets += betAmount
+
+			switch result {
+			case PlayerWin:
+				totalWinnings += betAmount * 2 // Return bet + winnings
+			case PlayerBlackjack:
+				totalWinnings += int(float64(betAmount) * 2.5) // Return bet + 1.5x winnings
+			case Push:
+				totalWinnings += betAmount // Return bet only
+			case DealerWin, DealerBlackjack:
+				// No winnings, bet is lost
+			}
+
+			// Restore original hand index
+			player.SetCurrentHandIndex(originalHandIdx)
 		}
+
+		// Apply the net result
+		player.chips += totalWinnings
+		player.bet = 0 // Clear the bet
 	}
 }
 

@@ -9,13 +9,29 @@ import (
 
 // Hand represents a hand of cards in blackjack
 type Hand struct {
-	cards []cards.Card // cards are the game cards in the hand
+	cards    []cards.Card // cards are the game cards in the hand
+	isSplit  bool         // Whether this hand came from a split
+	isActive bool         // Whether this hand is still being played
+	isStood  bool         // Whether the player has stood on this hand
 }
 
 // NewHand creates a new empty hand
 func NewHand() *Hand {
 	return &Hand{
-		cards: make([]cards.Card, 0, 2),
+		cards:    make([]cards.Card, 0, 2),
+		isSplit:  false,
+		isActive: true,
+		isStood:  false,
+	}
+}
+
+// NewSplitHand creates a new hand from a split with the initial card
+func NewSplitHand(card cards.Card) *Hand {
+	return &Hand{
+		cards:    []cards.Card{card},
+		isSplit:  true,
+		isActive: true,
+		isStood:  false,
 	}
 }
 
@@ -65,7 +81,7 @@ func (h *Hand) IsBusted() bool {
 
 // IsBlackjack returns true if the hand is a natural blackjack (21 with 2 cards)
 func (h *Hand) IsBlackjack() bool {
-	return len(h.cards) == 2 && h.Value() == 21
+	return len(h.cards) == 2 && h.Value() == 21 && !h.isSplit
 }
 
 // IsSoft returns true if the hand contains an ace counted as 11
@@ -97,6 +113,62 @@ func (h *Hand) Count() int {
 // Clear removes all cards from the hand
 func (h *Hand) Clear() {
 	h.cards = h.cards[:0]
+	h.isSplit = false
+	h.isActive = true
+	h.isStood = false
+}
+
+// IsSplit returns true if this hand came from a split
+func (h *Hand) IsSplit() bool {
+	return h.isSplit
+}
+
+// IsActive returns true if this hand is still being played
+func (h *Hand) IsActive() bool {
+	return h.isActive
+}
+
+// SetActive sets the active status of the hand
+func (h *Hand) SetActive(active bool) {
+	h.isActive = active
+}
+
+// IsStood returns true if the player has stood on this hand
+func (h *Hand) IsStood() bool {
+	return h.isStood
+}
+
+// Stand marks the hand as stood
+func (h *Hand) Stand() {
+	h.isStood = true
+	h.isActive = false
+}
+
+// CanSplit returns true if the hand can be split (two cards of same rank)
+func (h *Hand) CanSplit() bool {
+	if len(h.cards) != 2 {
+		return false
+	}
+	return h.cards[0].Rank == h.cards[1].Rank
+}
+
+// SplitHand splits the hand into two hands, returning the second hand
+func (h *Hand) SplitHand() *Hand {
+	if !h.CanSplit() {
+		return nil
+	}
+
+	// Take the second card for the new hand
+	secondCard := h.cards[1]
+	h.cards = h.cards[:1]
+
+	// Mark this hand as split
+	h.isSplit = true
+
+	// Create new hand with the second card
+	newHand := NewSplitHand(secondCard)
+
+	return newHand
 }
 
 // String returns a string representation of the hand
@@ -110,7 +182,12 @@ func (h *Hand) String() string {
 		cardStrings = append(cardStrings, card.String())
 	}
 
-	return fmt.Sprintf("[%s] (Value: %d)", strings.Join(cardStrings, ", "), h.Value())
+	splitText := ""
+	if h.isSplit {
+		splitText = " (Split)"
+	}
+
+	return fmt.Sprintf("[%s] (Value: %d)%s", strings.Join(cardStrings, ", "), h.Value(), splitText)
 }
 
 // StringHidden returns a string representation with the first card hidden (for dealer)
