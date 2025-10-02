@@ -177,8 +177,8 @@ func (p *Player) Split() error {
 
 // CanSplit returns true if the player can split their hand
 func (p *Player) CanSplit() bool {
-	// Can only split if we have enough chips and the hand can be split
-	return p.CurrentHand().CanSplit() && p.chipManager.HasEnoughChips(p.bet)
+	// Can only split if we have enough chips, the hand can be split, and we have fewer than 4 hands (maximum allowed)
+	return len(p.hands) < 4 && p.CurrentHand().CanSplit() && p.chipManager.HasEnoughChips(p.bet)
 }
 
 // ClearHand clears all of the player's hands for a new round

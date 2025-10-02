@@ -11,7 +11,7 @@ A comprehensive console-based blackjack game written in Go, featuring a dealer, 
   - Blackjack pays 3:2
   - Dealer hits on soft 17
   - Double down on any two cards
-  - Split pairs (including multiple splits)
+  - Split pairs (up to 4 hands per player)
   - Standard hand evaluation with proper Ace handling
 - **Interactive Gameplay**: Console-based interface with clear prompts and game state display
 - **Betting System**: Chip-based betting with win/loss tracking
@@ -124,6 +124,7 @@ go build
   - Each split hand gets a separate bet equal to the original bet
   - Split hands cannot achieve "natural" blackjack (still pays 1:1)
   - Can continue to hit, stand, or double down on each split hand
+  - Maximum of 4 hands per player (up to 3 splits from the original hand)
 - **Winning**: Beat dealer without busting, or dealer busts
 
 ## Dependencies
