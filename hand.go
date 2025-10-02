@@ -27,12 +27,11 @@ func NewHand() *Hand {
 
 // NewSplitHand creates a new hand from a split with the initial card
 func NewSplitHand(card cards.Card) *Hand {
-	return &Hand{
-		cards:    []cards.Card{card},
-		isSplit:  true,
-		isActive: true,
-		isStood:  false,
-	}
+	h := NewHand()
+	h.isSplit = true
+	h.AddCard(card)
+
+	return h
 }
 
 // AddCard adds a card to the hand
@@ -81,7 +80,7 @@ func (h *Hand) IsBusted() bool {
 
 // IsBlackjack returns true if the hand is a natural blackjack (21 with 2 cards)
 func (h *Hand) IsBlackjack() bool {
-	return len(h.cards) == 2 && h.Value() == 21 && !h.isSplit
+	return len(h.cards) == 2 && h.Value() == 21 && !h.IsSplit()
 }
 
 // IsSoft returns true if the hand contains an ace counted as 11
