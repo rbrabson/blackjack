@@ -208,16 +208,10 @@ func TestHandSplit(t *testing.T) {
 	if hand.Count() != 1 {
 		t.Errorf("Original hand should have 1 card, got %d", hand.Count())
 	}
-	if !hand.IsSplit() {
-		t.Error("Original hand should be marked as split")
-	}
 
 	// Check new hand
 	if newHand.Count() != 1 {
 		t.Errorf("New hand should have 1 card, got %d", newHand.Count())
-	}
-	if !newHand.IsSplit() {
-		t.Error("New hand should be marked as split")
 	}
 
 	// Split hands cannot have blackjack

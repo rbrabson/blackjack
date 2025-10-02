@@ -118,11 +118,6 @@ func (h *Hand) Clear() {
 	h.isStood = false
 }
 
-// IsSplit returns true if this hand came from a split
-func (h *Hand) IsSplit() bool {
-	return h.isSplit
-}
-
 // IsActive returns true if this hand is still being played
 func (h *Hand) IsActive() bool {
 	return h.isActive
