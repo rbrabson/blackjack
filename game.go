@@ -39,7 +39,7 @@ func (gr GameResult) String() string {
 type Game struct {
 	dealer  *Dealer
 	players []*Player
-	shoe    *BlackjackShoe
+	shoe    *Shoe
 	round   int
 }
 
@@ -48,7 +48,7 @@ func New(numDecks int) *Game {
 	return &Game{
 		dealer:  NewDealer(),
 		players: make([]*Player, 0),
-		shoe:    NewBlackjackShoe(numDecks),
+		shoe:    NewShoe(numDecks),
 		round:   0,
 	}
 }
@@ -93,7 +93,7 @@ func (bg *Game) Dealer() *Dealer {
 }
 
 // Shoe returns the shoe
-func (bg *Game) Shoe() *BlackjackShoe {
+func (bg *Game) Shoe() *Shoe {
 	return bg.shoe
 }
 
