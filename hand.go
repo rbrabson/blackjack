@@ -105,6 +105,11 @@ func (h *Hand) IsSoft() bool {
 	return hasAce && value <= 21
 }
 
+// IsSplit returns true if this hand was created by a split.
+func (h *Hand) IsSplit() bool {
+	return h.isSplit
+}
+
 // Count returns the number of cards in the hand
 func (h *Hand) Count() int {
 	return len(h.cards)
