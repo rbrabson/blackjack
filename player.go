@@ -131,12 +131,12 @@ func (p *Player) PushBet() {
 
 // Hit adds a card to the player's hand
 func (p *Player) Hit(card cards.Card) {
-	p.hands[p.currentHandIdx].AddCard(card)
+	p.CurrentHand().AddCard(card)
 }
 
 // CanDoubleDown returns true if the player can double down
 func (p *Player) CanDoubleDown() bool {
-	return p.hands[p.currentHandIdx].Count() == 2 && p.chipManager.HasEnoughChips(p.bet)
+	return p.CurrentHand().Count() == 2 && p.chipManager.HasEnoughChips(p.bet)
 }
 
 // DoubleDown doubles the player's bet and they get exactly one more card
@@ -159,7 +159,7 @@ func (p *Player) Split() error {
 		return fmt.Errorf("cannot split")
 	}
 
-	currentHand := &p.hands[p.currentHandIdx]
+	currentHand := p.CurrentHand()
 
 	// Use the Hand's SplitHand method to get the new hand
 	newHand := currentHand.SplitHand()
@@ -178,7 +178,7 @@ func (p *Player) Split() error {
 // CanSplit returns true if the player can split their hand
 func (p *Player) CanSplit() bool {
 	// Can only split if we have enough chips and the hand can be split
-	return p.hands[p.currentHandIdx].CanSplit() && p.chipManager.HasEnoughChips(p.bet)
+	return p.CurrentHand().CanSplit() && p.chipManager.HasEnoughChips(p.bet)
 }
 
 // ClearHand clears all of the player's hands for a new round

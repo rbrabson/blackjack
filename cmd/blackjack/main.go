@@ -237,7 +237,7 @@ func playerTurns(game *blackjack.Game) {
 				}
 
 				if player.CanSplit() {
-					fmt.Print(", (p)lit")
+					fmt.Print(", s(p)lit")
 				}
 
 				fmt.Print(": ")
