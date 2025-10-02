@@ -2,6 +2,7 @@ package blackjack
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 )
 
@@ -37,17 +38,17 @@ func (gr GameResult) String() string {
 
 // Game represents the main game
 type Game struct {
-	dealer  *Dealer
-	players []*Player
-	shoe    *Shoe
-	round   int
+	dealer  *Dealer   // dealer is the game dealer
+	players []*Player // players are the game players
+	shoe    *Shoe     // shoe are the cards used in the game
+	round   int       // round is the current round number
 }
 
 // New creates a new blackjack game
 func New(numDecks int) *Game {
 	return &Game{
 		dealer:  NewDealer(),
-		players: make([]*Player, 0),
+		players: make([]*Player, 0, 1),
 		shoe:    NewShoe(numDecks),
 		round:   0,
 	}
@@ -109,7 +110,7 @@ func (bg *Game) DealCard() error {
 	}
 
 	if bg.shoe.NeedsReshuffle() {
-		fmt.Println("Reshuffling shoe...")
+		slog.Debug("Reshuffling blackjack shoe...")
 		bg.shoe.Reshuffle()
 	}
 
@@ -129,7 +130,7 @@ func (bg *Game) StartNewRound() error {
 
 	// Check if we need to reshuffle
 	if bg.shoe.NeedsReshuffle() {
-		fmt.Println("Reshuffling shoe...")
+		slog.Debug("Reshuffling blackjack shoe...")
 		bg.shoe.Reshuffle()
 	}
 

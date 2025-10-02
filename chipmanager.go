@@ -4,11 +4,11 @@ import "fmt"
 
 // ChipManager interface defines the operations for managing player chips
 type ChipManager interface {
-	GetChips() int
-	SetChips(amount int)
-	AddChips(amount int)
-	DeductChips(amount int) error
-	HasEnoughChips(amount int) bool
+	GetChips() int                  // GetChips returns the current chip count
+	SetChips(amount int)            // SetChips sets the chip count to the specified amount
+	AddChips(amount int)            // AddChips adds the specified amount to the chip count
+	DeductChips(amount int) error   // DeductChips removes the specified amount from the chip count
+	HasEnoughChips(amount int) bool // HasEnoughChips returns true if there are enough chips for the specified amount
 }
 
 // DefaultChipManager implements ChipManager with simple integer-based chip management

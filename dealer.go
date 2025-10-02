@@ -31,29 +31,26 @@ func (d *Dealer) Hit(card cards.Card) {
 // ShouldHit returns true if the dealer should hit according to standard blackjack rules
 // Dealer hits on 16 or less, stands on 17 or more (including soft 17)
 func (d *Dealer) ShouldHit() bool {
-	if d.hand.IsBusted() {
-		return false
-	}
-
 	value := d.hand.Value()
 
+	switch {
+	// Always stand if busted
+	case d.hand.IsBusted():
+		return false
 	// Stand on hard 17 or higher
-	if value >= 17 && !d.hand.IsSoft() {
+	case value >= 17 && !d.hand.IsSoft():
 		return false
-	}
-
 	// Hit on soft 17 (house rule - can be changed)
-	if value == 17 && d.hand.IsSoft() {
+	case value == 17 && d.hand.IsSoft():
 		return true
-	}
-
 	// Stand on soft 18 or higher
-	if value >= 18 {
+	case value >= 18:
 		return false
-	}
-
 	// Hit on 16 or less
-	return value <= 16
+	default:
+		return value <= 16
+
+	}
 }
 
 // ShowFirstCard returns the dealer's first card (face up)

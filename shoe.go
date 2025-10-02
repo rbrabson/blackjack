@@ -8,6 +8,7 @@ import (
 
 const (
 	CutCardPenetration = 0.75 // CutCardPenetration is the fraction of the shoe dealt before reshuffling
+	NumCardsInDeck     = 52   // NumCardsInDeck is the number of cards in a standard deck
 )
 
 // Shoe wraps the cards.Shoe with blackjack-specific functionality
@@ -43,7 +44,7 @@ func (s *Shoe) IsEmpty() bool {
 
 // NeedsReshuffle returns true if the cut card has been reached
 func (s *Shoe) NeedsReshuffle() bool {
-	return len(s.cards) <= (s.numDecks*52 - s.cutCard)
+	return len(s.cards) <= ((s.numDecks * NumCardsInDeck) - s.cutCard)
 }
 
 // CardsRemaining returns the number of cards left in the shoe
@@ -67,7 +68,7 @@ func (s *Shoe) NumDecks() int {
 
 // Penetration returns the percentage of cards that have been dealt
 func (s *Shoe) Penetration() float64 {
-	totalCards := s.numDecks * 52
+	totalCards := s.numDecks * NumCardsInDeck
 	cardsDealt := totalCards - len(s.cards)
 	return float64(cardsDealt) / float64(totalCards) * 100
 }
