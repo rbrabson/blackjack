@@ -100,6 +100,7 @@ game.AddPlayerWithChipManager("Bob", 500, customManager)
    - **Stand**: Keep current hand
    - **Double Down**: Double the bet and take exactly one more card (if eligible)
    - **Split**: If dealt a pair, split into two separate hands with separate bets
+   - **Surrender**: Forfeit the hand and get half the bet back (if eligible)
 5. **Dealer Play**: Dealer reveals hole card and hits according to rules
 6. **Payouts**: Winners are paid according to standard blackjack payouts
 
@@ -125,6 +126,10 @@ go build
   - Split hands cannot achieve "natural" blackjack (still pays 1:1)
   - Can continue to hit, stand, or double down on each split hand
   - Maximum of 4 hands per player (up to 3 splits from the original hand)
+- **Surrender**: Available only when a hand has exactly 2 cards and hasn't been acted upon
+  - Player forfeits the hand and receives half their bet back
+  - Hand is automatically considered "stood" and no further actions are possible
+  - Can be used on split hands if they meet the surrender conditions
 - **Winning**: Beat dealer without busting, or dealer busts
 
 ## Dependencies
@@ -198,6 +203,20 @@ Bob: Player Blackjack!
   Chips: 512
 
 Play another round? (y/n):
+```
+
+## Surrender Example
+
+```sh
+🎮 Alice's turn:
+Alice: [10♠, 6♥] (Value: 16)
+What would you like to do? [h(i)t, (s)tand, s(p)lit, (d)ouble, s(u)rrender]: u
+Alice surrendered and received 25 chips back.
+
+💰 Round Results:
+================
+Alice: Player Surrendered (received half bet back)
+  Chips: 975
 ```
 
 ## Split Example
