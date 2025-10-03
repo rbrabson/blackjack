@@ -264,6 +264,33 @@ func (bg *Game) PlayerStand(playerName string) error {
 	return nil
 }
 
+// PlayerSurrender handles a player surrendering their current hand
+func (bg *Game) PlayerSurrender(playerName string) error {
+	player := bg.GetPlayer(playerName)
+	if player == nil {
+		return fmt.Errorf("player %s not found", playerName)
+	}
+
+	if !player.IsActive() {
+		return fmt.Errorf("player %s is not active", playerName)
+	}
+
+	if !player.CanSurrender() {
+		return fmt.Errorf("player %s cannot surrender at this time", playerName)
+	}
+
+	// Surrender the current hand
+	player.Surrender()
+
+	// Move to next active hand if available
+	if !player.MoveToNextActiveHand() {
+		// No more active hands, player is done
+		player.SetActive(false)
+	}
+
+	return nil
+}
+
 // DealerPlay handles the dealer's turn according to blackjack rules
 func (bg *Game) DealerPlay() error {
 	for bg.dealer.ShouldHit() {

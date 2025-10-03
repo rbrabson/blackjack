@@ -240,6 +240,10 @@ func playerTurns(game *blackjack.Game) {
 					fmt.Print(", s(p)lit")
 				}
 
+				if player.CanSurrender() {
+					fmt.Print(", s(u)rrender")
+				}
+
 				fmt.Print(": ")
 				scanner.Scan()
 				action := strings.ToLower(strings.TrimSpace(scanner.Text()))
@@ -313,8 +317,22 @@ func playerTurns(game *blackjack.Game) {
 					// Show current hand after split
 					fmt.Printf("Current hand: %s\n", currentHand.String())
 
+				case "u", "surrender":
+					if !player.CanSurrender() {
+						fmt.Println("Cannot surrender.")
+						continue
+					}
+
+					err := game.PlayerSurrender(player.Name())
+					if err != nil {
+						fmt.Printf("Error: %v\n", err)
+						continue
+					}
+
+					fmt.Printf("Surrendered! Half bet returned.\n")
+
 				default:
-					fmt.Println("Invalid action. Please choose (h)it, (s)tand, (d)ouble down, or s(p)lit if available.")
+					fmt.Println("Invalid action. Please choose (h)it, (s)tand, (d)ouble down, s(p)lit, or s(u)rrender if available.")
 				}
 			}
 

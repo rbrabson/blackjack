@@ -129,6 +129,20 @@ func (p *Player) PushBet() {
 	p.bet = 0
 }
 
+// Surrender allows the player to forfeit their hand and lose half their bet
+func (p *Player) Surrender() {
+	halfBet := p.bet / 2
+	p.chipManager.AddChips(halfBet)
+	p.bet = 0
+	p.CurrentHand().Stand()
+}
+
+// CanSurrender returns true if the player can surrender (typically only on first two cards)
+func (p *Player) CanSurrender() bool {
+	currentHand := p.CurrentHand()
+	return len(p.Hands()) == 1 && currentHand.Count() == 2 && !currentHand.IsStood() && !currentHand.IsBusted()
+}
+
 // Hit adds a card to the player's hand
 func (p *Player) Hit(card cards.Card) {
 	p.CurrentHand().AddCard(card)
