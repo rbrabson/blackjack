@@ -44,7 +44,7 @@ func NewHand() *Hand {
 		isSplit:  false,
 		isActive: true,
 		isStood:  false,
-		actions:  make([]Action, 0),
+		actions:  make([]Action, 0, 1),
 	}
 }
 
