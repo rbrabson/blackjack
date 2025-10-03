@@ -283,7 +283,7 @@ func playerTurns(game *blackjack.Game) {
 						continue
 					}
 
-					err = game.PlayerHit(player.Name())
+					err = game.PlayerDoubleDownHit(player.Name())
 					if err != nil {
 						fmt.Printf("Error: %v\n", err)
 						continue

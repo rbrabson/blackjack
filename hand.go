@@ -3,9 +3,30 @@ package blackjack
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/rbrabson/cards"
 )
+
+// ActionType represents the type of action taken on a hand
+type ActionType string
+
+const (
+	ActionDeal      ActionType = "deal"
+	ActionHit       ActionType = "hit"
+	ActionStand     ActionType = "stand"
+	ActionDouble    ActionType = "double"
+	ActionSplit     ActionType = "split"
+	ActionSurrender ActionType = "surrender"
+)
+
+// Action represents an action taken on a hand
+type Action struct {
+	Type      ActionType  `json:"type"`
+	Card      *cards.Card `json:"card,omitempty"` // Card involved (for deal/hit)
+	Timestamp time.Time   `json:"timestamp"`
+	Details   string      `json:"details,omitempty"` // Additional details about the action
+}
 
 // Hand represents a hand of cards in blackjack
 type Hand struct {
@@ -13,6 +34,7 @@ type Hand struct {
 	isSplit  bool         // Whether this hand came from a split
 	isActive bool         // Whether this hand is still being played
 	isStood  bool         // Whether the player has stood on this hand
+	actions  []Action     // All actions taken on this hand
 }
 
 // NewHand creates a new empty hand
@@ -22,6 +44,7 @@ func NewHand() *Hand {
 		isSplit:  false,
 		isActive: true,
 		isStood:  false,
+		actions:  make([]Action, 0),
 	}
 }
 
@@ -29,7 +52,7 @@ func NewHand() *Hand {
 func NewSplitHand(card cards.Card) *Hand {
 	h := NewHand()
 	h.isSplit = true
-	h.AddCard(card)
+	h.AddCardWithAction(card, ActionDeal, "split card")
 
 	return h
 }
@@ -37,6 +60,88 @@ func NewSplitHand(card cards.Card) *Hand {
 // AddCard adds a card to the hand
 func (h *Hand) AddCard(card cards.Card) {
 	h.cards = append(h.cards, card)
+	// Record the card as a hit action (dealing will be tracked separately)
+	h.recordAction(ActionHit, &card, "")
+}
+
+// AddCardWithAction adds a card to the hand and records the specific action
+func (h *Hand) AddCardWithAction(card cards.Card, actionType ActionType, details string) {
+	h.cards = append(h.cards, card)
+	h.recordAction(actionType, &card, details)
+}
+
+// recordAction records an action taken on this hand
+func (h *Hand) recordAction(actionType ActionType, card *cards.Card, details string) {
+	action := Action{
+		Type:      actionType,
+		Card:      card,
+		Timestamp: time.Now(),
+		Details:   details,
+	}
+	h.actions = append(h.actions, action)
+}
+
+// RecordAction records an action without a card (like stand, surrender)
+func (h *Hand) RecordAction(actionType ActionType, details string) {
+	h.recordAction(actionType, nil, details)
+}
+
+// Actions returns a copy of all actions taken on this hand
+func (h *Hand) Actions() []Action {
+	result := make([]Action, len(h.actions))
+	copy(result, h.actions)
+	return result
+}
+
+// ActionSummary returns a string summary of all actions taken on this hand
+func (h *Hand) ActionSummary() string {
+	if len(h.actions) == 0 {
+		return "No actions"
+	}
+
+	var summary strings.Builder
+	for i, action := range h.actions {
+		if i > 0 {
+			summary.WriteString(", ")
+		}
+
+		switch action.Type {
+		case ActionDeal:
+			if action.Card != nil {
+				summary.WriteString(fmt.Sprintf("dealt %s", action.Card))
+			} else {
+				summary.WriteString("dealt")
+			}
+		case ActionHit:
+			if action.Card != nil {
+				summary.WriteString(fmt.Sprintf("hit %s", action.Card))
+			} else {
+				summary.WriteString("hit")
+			}
+		case ActionStand:
+			summary.WriteString("stand")
+		case ActionDouble:
+			if action.Card != nil {
+				summary.WriteString(fmt.Sprintf("double %s", action.Card))
+			} else {
+				summary.WriteString("double")
+			}
+		case ActionSplit:
+			summary.WriteString("split")
+		case ActionSurrender:
+			summary.WriteString("surrender")
+		default:
+			summary.WriteString(string(action.Type))
+		}
+
+		if action.Details != "" {
+			summary.WriteString(" (")
+			summary.WriteString(action.Details)
+			summary.WriteString(")")
+		}
+	}
+
+	return summary.String()
 }
 
 // Cards returns a copy of the cards in the hand
@@ -141,6 +246,7 @@ func (h *Hand) IsStood() bool {
 func (h *Hand) Stand() {
 	h.isStood = true
 	h.isActive = false
+	h.RecordAction(ActionStand, "")
 }
 
 // CanSplit returns true if the hand can be split (two cards of same rank)

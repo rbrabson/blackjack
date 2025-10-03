@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/rbrabson/blackjack"
 )
@@ -96,4 +97,7 @@ func main() {
 	} else {
 		fmt.Printf("Alice successfully placed 600 chip bet. Remaining chips: %d\n", alice.Chips())
 	}
+
+	fmt.Println("\n" + strings.Repeat("=", 50))
+	demonstrateActionTracking()
 }

@@ -134,6 +134,7 @@ func (p *Player) Surrender() {
 	halfBet := p.bet / 2
 	p.chipManager.AddChips(halfBet)
 	p.bet = 0
+	p.CurrentHand().RecordAction(ActionSurrender, fmt.Sprintf("received %d chips back", halfBet))
 	p.CurrentHand().Stand()
 }
 
@@ -145,7 +146,18 @@ func (p *Player) CanSurrender() bool {
 
 // Hit adds a card to the player's hand
 func (p *Player) Hit(card cards.Card) {
-	p.CurrentHand().AddCard(card)
+	// Use AddCardWithAction to specify this is a hit
+	p.CurrentHand().AddCardWithAction(card, ActionHit, "player hit")
+}
+
+// DealCard adds a card to the player's hand as part of the initial deal
+func (p *Player) DealCard(card cards.Card) {
+	p.CurrentHand().AddCardWithAction(card, ActionDeal, "initial deal")
+}
+
+// DoubleDownHit adds a card to the player's hand as part of a double down
+func (p *Player) DoubleDownHit(card cards.Card) {
+	p.CurrentHand().AddCardWithAction(card, ActionDouble, "double down card")
 }
 
 // CanDoubleDown returns true if the player can double down
@@ -163,7 +175,9 @@ func (p *Player) DoubleDown() error {
 	if err != nil {
 		return err
 	}
+	originalBet := p.bet
 	p.bet *= 2
+	p.CurrentHand().RecordAction(ActionDouble, fmt.Sprintf("bet increased from %d to %d", originalBet, p.bet))
 	return nil
 }
 
@@ -175,11 +189,17 @@ func (p *Player) Split() error {
 
 	currentHand := p.CurrentHand()
 
+	// Record split action before splitting
+	currentHand.RecordAction(ActionSplit, fmt.Sprintf("split into %d hands", len(p.hands)+1))
+
 	// Use the Hand's SplitHand method to get the new hand
 	newHand := currentHand.SplitHand()
 	if newHand == nil {
 		return fmt.Errorf("split failed")
 	}
+
+	// Record split action on the new hand too
+	newHand.RecordAction(ActionSplit, "created from split")
 
 	// Add the new hand to the player's hands
 	p.hands = append(p.hands, *newHand)

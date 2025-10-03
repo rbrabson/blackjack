@@ -25,7 +25,19 @@ func (d *Dealer) Hand() *Hand {
 
 // Hit adds a card to the dealer's hand
 func (d *Dealer) Hit(card cards.Card) {
-	d.hand.AddCard(card)
+	d.hand.AddCardWithAction(card, ActionHit, "dealer hit")
+}
+
+// DealCard adds a card to the dealer's hand as part of the initial deal
+func (d *Dealer) DealCard(card cards.Card) {
+	d.hand.AddCardWithAction(card, ActionDeal, "initial deal")
+}
+
+// Stand marks the dealer as standing
+func (d *Dealer) Stand() {
+	d.hand.RecordAction(ActionStand, "dealer stands")
+	d.hand.isStood = true
+	d.hand.isActive = false
 }
 
 // ShouldHit returns true if the dealer should hit according to standard blackjack rules

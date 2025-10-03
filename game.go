@@ -146,7 +146,7 @@ func (bg *Game) DealInitialCards() error {
 			if err != nil {
 				return fmt.Errorf("failed to deal card to %s: %w", player.Name(), err)
 			}
-			player.Hit(card)
+			player.DealCard(card)
 		}
 	}
 
@@ -155,7 +155,7 @@ func (bg *Game) DealInitialCards() error {
 	if err != nil {
 		return fmt.Errorf("failed to deal card to dealer: %w", err)
 	}
-	bg.dealer.Hit(card)
+	bg.dealer.DealCard(card)
 
 	// Deal second card to each player
 	for _, player := range bg.players {
@@ -164,7 +164,7 @@ func (bg *Game) DealInitialCards() error {
 			if err != nil {
 				return fmt.Errorf("failed to deal card to %s: %w", player.Name(), err)
 			}
-			player.Hit(card)
+			player.DealCard(card)
 		}
 	}
 
@@ -173,7 +173,7 @@ func (bg *Game) DealInitialCards() error {
 	if err != nil {
 		return fmt.Errorf("failed to deal hole card to dealer: %w", err)
 	}
-	bg.dealer.Hit(card)
+	bg.dealer.DealCard(card)
 
 	return nil
 }
@@ -199,6 +199,26 @@ func (bg *Game) PlayerHit(playerName string) error {
 	}
 
 	player.Hit(card)
+	return nil
+}
+
+// PlayerDoubleDownHit deals a card to a specific player as part of a double down
+func (bg *Game) PlayerDoubleDownHit(playerName string) error {
+	player := bg.GetPlayer(playerName)
+	if player == nil {
+		return fmt.Errorf("player %s not found", playerName)
+	}
+
+	if !player.IsActive() {
+		return fmt.Errorf("player %s is not active", playerName)
+	}
+
+	card, err := bg.shoe.Draw()
+	if err != nil {
+		return fmt.Errorf("failed to deal card: %w", err)
+	}
+
+	player.DoubleDownHit(card)
 	return nil
 }
 
@@ -300,6 +320,8 @@ func (bg *Game) DealerPlay() error {
 		}
 		bg.dealer.Hit(card)
 	}
+	// Record that dealer is standing
+	bg.dealer.Stand()
 	return nil
 }
 
