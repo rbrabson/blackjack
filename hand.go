@@ -35,6 +35,8 @@ type Hand struct {
 	isActive bool         // Whether this hand is still being played
 	isStood  bool         // Whether the player has stood on this hand
 	actions  []Action     // All actions taken on this hand
+	bet      int          // The bet amount for this specific hand
+	winnings int          // The winnings for this specific hand (can be negative for losses)
 }
 
 // NewHand creates a new empty hand
@@ -45,6 +47,8 @@ func NewHand() *Hand {
 		isActive: true,
 		isStood:  false,
 		actions:  make([]Action, 0, 1),
+		bet:      0,
+		winnings: 0,
 	}
 }
 
@@ -225,6 +229,33 @@ func (h *Hand) Clear() {
 	h.isSplit = false
 	h.isActive = true
 	h.isStood = false
+	h.bet = 0
+	h.winnings = 0
+}
+
+// Bet returns the bet amount for this hand
+func (h *Hand) Bet() int {
+	return h.bet
+}
+
+// SetBet sets the bet amount for this hand
+func (h *Hand) SetBet(amount int) {
+	h.bet = amount
+}
+
+// Winnings returns the winnings for this hand (can be negative for losses)
+func (h *Hand) Winnings() int {
+	return h.winnings
+}
+
+// SetWinnings sets the winnings for this hand
+func (h *Hand) SetWinnings(amount int) {
+	h.winnings = amount
+}
+
+// AddWinnings adds to the winnings for this hand
+func (h *Hand) AddWinnings(amount int) {
+	h.winnings += amount
 }
 
 // IsActive returns true if this hand is still being played

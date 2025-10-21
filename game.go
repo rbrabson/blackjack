@@ -358,44 +358,40 @@ func (bg *Game) EvaluateHand(player *Player) GameResult {
 // PayoutResults handles payouts for all players
 func (bg *Game) PayoutResults() {
 	for _, player := range bg.players {
-		if !player.IsActive() || player.Bet() == 0 {
+		// Skip inactive players
+		if !player.IsActive() {
 			continue
 		}
 
-		// Handle each hand separately
-		totalWinnings := 0
-		totalBets := 0
+		// Handle each hand separately using the new per-hand betting methods
 		hands := player.Hands()
+		originalHandIdx := player.GetCurrentHandIndex()
 
 		for handIdx := 0; handIdx < len(hands); handIdx++ {
+			// Skip hands with no bet
+			if hands[handIdx].Bet() == 0 {
+				continue
+			}
+
 			// Temporarily set current hand for evaluation
-			originalHandIdx := player.GetCurrentHandIndex()
 			player.SetCurrentHandIndex(handIdx)
 
 			result := bg.EvaluateHand(player)
-			betAmount := player.Bet() // Each split hand has the same bet amount
-			totalBets += betAmount
 
 			switch result {
 			case PlayerWin:
-				totalWinnings += betAmount * 2 // Return bet + winnings
+				player.WinBetOnHand(handIdx, 1.0) // 1:1 payout
 			case PlayerBlackjack:
-				totalWinnings += int(float64(betAmount) * 2.5) // Return bet + 1.5x winnings
+				player.WinBetOnHand(handIdx, 1.5) // 1.5:1 payout for blackjack
 			case Push:
-				totalWinnings += betAmount // Return bet only
+				player.PushBetOnHand(handIdx) // Return bet
 			case DealerWin, DealerBlackjack:
-				// No winnings, bet is lost
+				player.LoseBetOnHand(handIdx) // Lose bet
 			}
-
-			// Restore original hand index
-			player.SetCurrentHandIndex(originalHandIdx)
 		}
 
-		// Apply the net result
-		if totalWinnings != 0 {
-			player.AddChips(totalWinnings)
-		}
-		player.bet = 0 // Clear the bet
+		// Restore original hand index
+		player.SetCurrentHandIndex(originalHandIdx)
 	}
 }
 

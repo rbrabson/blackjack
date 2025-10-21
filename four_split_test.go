@@ -51,10 +51,12 @@ func TestFourSplitScenario(t *testing.T) {
 
 	// Set up both hands with pairs for further splitting
 	alice.hands[0] = *NewHand()
+	alice.hands[0].SetBet(100) // Set the bet that should be there after split
 	alice.hands[0].AddCard(ace1)
 	alice.hands[0].AddCard(ace3)
 
 	alice.hands[1] = *NewHand()
+	alice.hands[1].SetBet(100) // Set the bet that should be there after split
 	alice.hands[1].AddCard(ace2)
 	alice.hands[1].AddCard(ace4)
 
@@ -78,6 +80,7 @@ func TestFourSplitScenario(t *testing.T) {
 	ace6 := cards.Card{Suit: cards.Hearts, Rank: cards.Ace}
 
 	alice.hands[1] = *NewHand()
+	alice.hands[1].SetBet(100) // Set the bet that should be there after split
 	alice.hands[1].AddCard(ace2)
 	alice.hands[1].AddCard(ace5)
 
@@ -98,6 +101,7 @@ func TestFourSplitScenario(t *testing.T) {
 
 	// Set up one hand to be splittable for testing the limit
 	alice.hands[2] = *NewHand()
+	alice.hands[2].SetBet(100) // Set the bet that should be there after split
 	alice.hands[2].AddCard(ace3)
 	alice.hands[2].AddCard(ace6)
 
