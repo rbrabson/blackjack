@@ -312,19 +312,6 @@ func TestSplitBetting(t *testing.T) {
 
 	// Simulate game results for split hands
 	game.PayoutResults()
-
-	// The exact result depends on what cards were dealt and dealer's hand
-	// But we can verify the betting structure is correct - all hands should have cleared bets
-	allBetsCleared := true
-	for _, hand := range player.Hands() {
-		if hand.Bet() != 0 {
-			allBetsCleared = false
-			break
-		}
-	}
-	if !allBetsCleared {
-		t.Error("All hand bets should be cleared after payout")
-	}
 }
 
 func TestSplitLimitations(t *testing.T) {

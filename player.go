@@ -16,6 +16,7 @@ type Player struct {
 	currentHandIdx int
 }
 
+// NewPlayer creates a new player with the given name, initial chips, and optional settings
 func NewPlayer(name string, chips int, options ...Option) *Player {
 	player := &Player{
 		name:           name,
@@ -39,6 +40,7 @@ func (p *Player) Name() string {
 	return p.name
 }
 
+// WithChipManager sets a custom chip manager for the player.
 func WithChipManager(cm ChipManager) Option {
 	return func(p *Player) {
 		p.chipManager = cm
@@ -133,7 +135,6 @@ func (p *Player) WinBet(multiplier float64) {
 	totalPayout := hand.Bet() + winnings
 	p.chipManager.AddChips(totalPayout)
 	hand.SetWinnings(winnings)
-	hand.SetBet(0)
 }
 
 // WinBetOnHand adds winnings to the player's chips for a specific hand
@@ -146,14 +147,12 @@ func (p *Player) WinBetOnHand(handIndex int, multiplier float64) {
 	totalPayout := hand.Bet() + winnings
 	p.chipManager.AddChips(totalPayout)
 	hand.SetWinnings(winnings)
-	hand.SetBet(0)
 }
 
 // LoseBet removes the player's bet for the current hand (already deducted when placed)
 func (p *Player) LoseBet() {
 	hand := p.CurrentHand()
 	hand.SetWinnings(-hand.Bet()) // Record the loss
-	hand.SetBet(0)
 }
 
 // LoseBetOnHand removes the player's bet for a specific hand
@@ -163,7 +162,6 @@ func (p *Player) LoseBetOnHand(handIndex int) {
 	}
 	hand := &p.hands[handIndex]
 	hand.SetWinnings(-hand.Bet()) // Record the loss
-	hand.SetBet(0)
 }
 
 // PushBet returns the bet to the player for the current hand (tie)
@@ -171,7 +169,6 @@ func (p *Player) PushBet() {
 	hand := p.CurrentHand()
 	p.chipManager.AddChips(hand.Bet())
 	hand.SetWinnings(0) // No win or loss
-	hand.SetBet(0)
 }
 
 // PushBetOnHand returns the bet to the player for a specific hand
@@ -182,7 +179,6 @@ func (p *Player) PushBetOnHand(handIndex int) {
 	hand := &p.hands[handIndex]
 	p.chipManager.AddChips(hand.Bet())
 	hand.SetWinnings(0) // No win or loss
-	hand.SetBet(0)
 }
 
 // Surrender allows the player to forfeit their hand and lose half their bet

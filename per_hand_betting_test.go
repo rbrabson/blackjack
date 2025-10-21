@@ -40,8 +40,8 @@ func TestPerHandBetting(t *testing.T) {
 
 	// Test win
 	player.WinBet(1.0) // 1:1 payout
-	if player.CurrentHand().Bet() != 0 {
-		t.Error("Bet should be cleared after win")
+	if player.CurrentHand().Bet() == 0 {
+		t.Error("Bet shouldn't be cleared after win")
 	}
 	if player.CurrentHand().Winnings() != 100 {
 		t.Errorf("Expected winnings of 100, got %d", player.CurrentHand().Winnings())
@@ -100,14 +100,14 @@ func TestPerHandBettingWithSplit(t *testing.T) {
 	player.LoseBetOnHand(1)     // Second hand loses
 
 	// Check results
-	if player.hands[0].Bet() != 0 {
-		t.Error("First hand bet should be cleared after win")
+	if player.hands[0].Bet() == 0 {
+		t.Error("First hand bet shouldn't be cleared after win")
 	}
 	if player.hands[0].Winnings() != 100 {
 		t.Errorf("Expected first hand winnings of 100, got %d", player.hands[0].Winnings())
 	}
 
-	if player.hands[1].Bet() != 0 {
+	if player.hands[1].Bet() == 0 {
 		t.Error("Second hand bet should be cleared after loss")
 	}
 	if player.hands[1].Winnings() != -100 {
@@ -157,8 +157,8 @@ func TestPerHandBettingWithDoubleDown(t *testing.T) {
 	// Test win with doubled bet
 	player.WinBet(1.0) // 1:1 payout on doubled bet
 
-	if player.CurrentHand().Bet() != 0 {
-		t.Error("Bet should be cleared after win")
+	if player.CurrentHand().Bet() == 0 {
+		t.Error("Bet shouldn't be cleared after win")
 	}
 	if player.CurrentHand().Winnings() != 200 {
 		t.Errorf("Expected winnings of 200, got %d", player.CurrentHand().Winnings())
@@ -214,8 +214,8 @@ func TestPerHandBettingPush(t *testing.T) {
 	player.PushBet()
 
 	// Check bet was cleared and money returned
-	if player.CurrentHand().Bet() != 0 {
-		t.Error("Bet should be cleared after push")
+	if player.CurrentHand().Bet() == 0 {
+		t.Error("Bet shouldn't be cleared after push")
 	}
 	if player.CurrentHand().Winnings() != 0 {
 		t.Errorf("Expected winnings of 0 (push), got %d", player.CurrentHand().Winnings())
