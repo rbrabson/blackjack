@@ -50,12 +50,12 @@ func TestFourSplitScenario(t *testing.T) {
 	}
 
 	// Set up both hands with pairs for further splitting
-	alice.hands[0] = *NewHand()
+	alice.hands[0] = NewHand()
 	alice.hands[0].SetBet(100) // Set the bet that should be there after split
 	alice.hands[0].AddCard(ace1)
 	alice.hands[0].AddCard(ace3)
 
-	alice.hands[1] = *NewHand()
+	alice.hands[1] = NewHand()
 	alice.hands[1].SetBet(100) // Set the bet that should be there after split
 	alice.hands[1].AddCard(ace2)
 	alice.hands[1].AddCard(ace4)
@@ -79,7 +79,7 @@ func TestFourSplitScenario(t *testing.T) {
 	ace5 := cards.Card{Suit: cards.Spades, Rank: cards.Ace}
 	ace6 := cards.Card{Suit: cards.Hearts, Rank: cards.Ace}
 
-	alice.hands[1] = *NewHand()
+	alice.hands[1] = NewHand()
 	alice.hands[1].SetBet(100) // Set the bet that should be there after split
 	alice.hands[1].AddCard(ace2)
 	alice.hands[1].AddCard(ace5)
@@ -100,7 +100,7 @@ func TestFourSplitScenario(t *testing.T) {
 	}
 
 	// Set up one hand to be splittable for testing the limit
-	alice.hands[2] = *NewHand()
+	alice.hands[2] = NewHand()
 	alice.hands[2].SetBet(100) // Set the bet that should be there after split
 	alice.hands[2].AddCard(ace3)
 	alice.hands[2].AddCard(ace6)
@@ -159,11 +159,11 @@ func TestSplitLimitInGame(t *testing.T) {
 	}
 
 	// Set up hands for more splits
-	bob.hands[0] = *NewHand()
+	bob.hands[0] = NewHand()
 	bob.hands[0].AddCard(king1)
 	bob.hands[0].AddCard(cards.Card{Suit: cards.Clubs, Rank: cards.King})
 
-	bob.hands[1] = *NewHand()
+	bob.hands[1] = NewHand()
 	bob.hands[1].AddCard(king2)
 	bob.hands[1].AddCard(cards.Card{Suit: cards.Diamonds, Rank: cards.King})
 
@@ -179,7 +179,7 @@ func TestSplitLimitInGame(t *testing.T) {
 	}
 
 	// Set up for third split
-	bob.hands[1] = *NewHand()
+	bob.hands[1] = NewHand()
 	bob.hands[1].AddCard(cards.Card{Suit: cards.Spades, Rank: cards.King})
 	bob.hands[1].AddCard(cards.Card{Suit: cards.Hearts, Rank: cards.King})
 
@@ -195,7 +195,7 @@ func TestSplitLimitInGame(t *testing.T) {
 	}
 
 	// Set up one more hand to try splitting past the limit
-	bob.hands[2] = *NewHand()
+	bob.hands[2] = NewHand()
 	bob.hands[2].AddCard(cards.Card{Suit: cards.Clubs, Rank: cards.King})
 	bob.hands[2].AddCard(cards.Card{Suit: cards.Diamonds, Rank: cards.King})
 

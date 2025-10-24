@@ -228,7 +228,7 @@ func TestSurrenderWithMultipleHands(t *testing.T) {
 
 	// Clear and set up hands manually (simulating post-split state)
 	player.ClearHand()
-	player.hands = append(player.hands, *NewHand()) // Add second hand
+	player.hands = append(player.hands, NewHand()) // Add second hand
 
 	// First hand: 8, 3 (should be able to surrender)
 	player.hands[0].AddCard(card1)

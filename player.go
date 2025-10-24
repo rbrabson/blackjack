@@ -10,7 +10,7 @@ import (
 // Player represents a blackjack player
 type Player struct {
 	name           string
-	hands          []Hand
+	hands          []*Hand
 	chipManager    ChipManager
 	active         bool
 	currentHandIdx int
@@ -20,7 +20,7 @@ type Player struct {
 func NewPlayer(name string, chips int, options ...Option) *Player {
 	player := &Player{
 		name:           name,
-		hands:          []Hand{*NewHand()},
+		hands:          []*Hand{NewHand()},
 		chipManager:    NewDefaultChipManager(0),
 		active:         true,
 		currentHandIdx: 0,
@@ -55,13 +55,13 @@ func WithChips(chips int) Option {
 }
 
 // Hand returns all of the player's hands
-func (p *Player) Hands() []Hand {
+func (p *Player) Hands() []*Hand {
 	return p.hands
 }
 
 // CurrentHand returns the player's current hand
 func (p *Player) CurrentHand() *Hand {
-	return &p.hands[p.currentHandIdx]
+	return p.hands[p.currentHandIdx]
 }
 
 // NextHand moves to the next hand if available, returning true if successful
@@ -142,7 +142,7 @@ func (p *Player) WinBetOnHand(handIndex int, multiplier float64) {
 	if handIndex < 0 || handIndex >= len(p.hands) {
 		return
 	}
-	hand := &p.hands[handIndex]
+	hand := p.hands[handIndex]
 	winnings := int(float64(hand.Bet()) * multiplier)
 	totalPayout := hand.Bet() + winnings
 	p.chipManager.AddChips(totalPayout)
@@ -160,7 +160,7 @@ func (p *Player) LoseBetOnHand(handIndex int) {
 	if handIndex < 0 || handIndex >= len(p.hands) {
 		return
 	}
-	hand := &p.hands[handIndex]
+	hand := p.hands[handIndex]
 	hand.SetWinnings(-hand.Bet()) // Record the loss
 }
 
@@ -176,7 +176,7 @@ func (p *Player) PushBetOnHand(handIndex int) {
 	if handIndex < 0 || handIndex >= len(p.hands) {
 		return
 	}
-	hand := &p.hands[handIndex]
+	hand := p.hands[handIndex]
 	p.chipManager.AddChips(hand.Bet())
 	hand.SetWinnings(0) // No win or loss
 }
@@ -261,7 +261,7 @@ func (p *Player) Split() error {
 	newHand.RecordAction(ActionSplit, "created from split")
 
 	// Add the new hand to the player's hands
-	p.hands = append(p.hands, *newHand)
+	p.hands = append(p.hands, newHand)
 
 	// Deduct from chips for the new hand's bet
 	err := p.chipManager.DeductChips(currentBet)
@@ -277,7 +277,7 @@ func (p *Player) CanSplit() bool {
 // ClearHand clears all of the player's hands for a new round
 func (p *Player) ClearHand() {
 	// Reset to a single hand
-	p.hands = []Hand{*NewHand()}
+	p.hands = []*Hand{NewHand()}
 	p.currentHandIdx = 0
 }
 
@@ -317,7 +317,7 @@ func (p *Player) IsStanding() bool {
 		return true
 	}
 
-	currentHand := &p.hands[p.currentHandIdx]
+	currentHand := p.hands[p.currentHandIdx]
 	return currentHand.IsBusted() || currentHand.IsBlackjack() || currentHand.IsStood()
 }
 
@@ -328,7 +328,7 @@ func (p *Player) HasActiveHands() bool {
 	}
 
 	for i := p.currentHandIdx; i < len(p.hands); i++ {
-		hand := &p.hands[i]
+		hand := p.hands[i]
 		if !hand.IsBusted() && !hand.IsBlackjack() && !hand.IsStood() {
 			return true
 		}
