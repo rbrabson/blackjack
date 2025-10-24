@@ -358,11 +358,6 @@ func (bg *Game) EvaluateHand(player *Player) GameResult {
 // PayoutResults handles payouts for all players
 func (bg *Game) PayoutResults() {
 	for _, player := range bg.players {
-		// Skip inactive players
-		if !player.IsActive() {
-			continue
-		}
-
 		// Handle each hand separately using the new per-hand betting methods
 		hands := player.Hands()
 		originalHandIdx := player.GetCurrentHandIndex()
