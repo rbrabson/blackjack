@@ -96,7 +96,7 @@ func demonstrateActionTracking() {
 	player3.DealCard(hand3, cards.Card{Suit: cards.Hearts, Rank: cards.Six})
 	hand3.PlaceBet(100)
 
-	player3.Surrender(hand3)
+	hand3.Surrender()
 	fmt.Printf("Charlie's Hand: %s\n", player3.CurrentHand().String())
 	fmt.Printf("Charlie's Actions: %s\n", player3.CurrentHand().ActionSummary())
 

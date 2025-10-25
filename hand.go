@@ -378,6 +378,22 @@ func (h *Hand) SplitHand() *Hand {
 	return newHand
 }
 
+// CanSurrender returns true if the player can surrender (typically only on first two cards)
+func (h *Hand) CanSurrender() bool {
+	return len(h.player.Hands()) == 1 && h.Count() == 2 && !h.IsStood() && !h.IsBusted()
+}
+
+// Surrender allows the player to forfeit their hand and lose half their bet
+func (h *Hand) Surrender() {
+	currentBet := h.Bet()
+	halfBet := currentBet / 2
+	h.player.chipManager.AddChips(halfBet)
+	h.SetWinnings(-halfBet) // Record the loss of half bet
+	h.SetBet(0)
+	h.RecordAction(ActionSurrender, fmt.Sprintf("received %d chips back", halfBet))
+	h.Stand()
+}
+
 // String returns a string representation of the hand
 func (h *Hand) String() string {
 	if len(h.cards) == 0 {

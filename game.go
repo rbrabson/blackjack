@@ -287,6 +287,7 @@ func (bg *Game) PlayerStand(playerName string) error {
 // PlayerSurrender handles a player surrendering their current hand
 func (bg *Game) PlayerSurrender(playerName string) error {
 	player := bg.GetPlayer(playerName)
+	hand := player.CurrentHand()
 	if player == nil {
 		return fmt.Errorf("player %s not found", playerName)
 	}
@@ -295,12 +296,12 @@ func (bg *Game) PlayerSurrender(playerName string) error {
 		return fmt.Errorf("player %s is not active", playerName)
 	}
 
-	if !player.CanSurrender(player.CurrentHand()) {
+	if !hand.CanSurrender() {
 		return fmt.Errorf("player %s cannot surrender at this time", playerName)
 	}
 
 	// Surrender the current hand
-	player.Surrender(player.CurrentHand())
+	hand.Surrender()
 
 	// Move to next active hand if available
 	if !player.MoveToNextActiveHand() {

@@ -92,22 +92,6 @@ func (p *Player) SetActive(active bool) {
 	p.active = active
 }
 
-// Surrender allows the player to forfeit their hand and lose half their bet
-func (p *Player) Surrender(hand *Hand) {
-	currentBet := hand.Bet()
-	halfBet := currentBet / 2
-	p.chipManager.AddChips(halfBet)
-	hand.SetWinnings(-halfBet) // Record the loss of half bet
-	hand.SetBet(0)
-	hand.RecordAction(ActionSurrender, fmt.Sprintf("received %d chips back", halfBet))
-	hand.Stand()
-}
-
-// CanSurrender returns true if the player can surrender (typically only on first two cards)
-func (p *Player) CanSurrender(hand *Hand) bool {
-	return len(p.Hands()) == 1 && hand.Count() == 2 && !hand.IsStood() && !hand.IsBusted()
-}
-
 // Hit adds a card to the player's hand
 func (p *Player) Hit(hand *Hand, card cards.Card) {
 	// Use AddCardWithAction to specify this is a hit

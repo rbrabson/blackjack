@@ -243,7 +243,7 @@ func playerTurns(game *blackjack.Game) {
 					fmt.Print(", s(p)lit")
 				}
 
-				if player.CanSurrender(currentHand) {
+				if currentHand.CanSurrender() {
 					fmt.Print(", s(u)rrender")
 				}
 
@@ -321,7 +321,7 @@ func playerTurns(game *blackjack.Game) {
 					fmt.Printf("Current hand: %s\n", currentHand.String())
 
 				case "u", "surrender":
-					if !player.CanSurrender(currentHand) {
+					if !currentHand.CanSurrender() {
 						fmt.Println("Cannot surrender.")
 						continue
 					}
