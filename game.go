@@ -233,12 +233,12 @@ func (bg *Game) PlayerSplit(playerName string) error {
 		return fmt.Errorf("player %s is not active", playerName)
 	}
 
-	if !player.CanSplit(player.CurrentHand()) {
+	if !player.CurrentHand().CanSplit() {
 		return fmt.Errorf("player %s cannot split", playerName)
 	}
 
 	// Split the hand
-	err := player.Split(player.CurrentHand())
+	err := player.CurrentHand().Split()
 	if err != nil {
 		return fmt.Errorf("failed to split hand: %w", err)
 	}

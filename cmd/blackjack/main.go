@@ -239,7 +239,7 @@ func playerTurns(game *blackjack.Game) {
 					fmt.Print(", (d)ouble down")
 				}
 
-				if player.CanSplit(currentHand) {
+				if currentHand.CanSplit() {
 					fmt.Print(", s(p)lit")
 				}
 
@@ -305,7 +305,7 @@ func playerTurns(game *blackjack.Game) {
 					}
 
 				case "p", "split":
-					if !player.CanSplit(currentHand) {
+					if !currentHand.CanSplit() {
 						fmt.Println("Cannot split.")
 						continue
 					}

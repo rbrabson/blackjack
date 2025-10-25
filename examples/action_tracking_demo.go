@@ -108,7 +108,7 @@ func demonstrateActionTracking() {
 	hand4.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Eight})
 	hand4.PlaceBet(75)
 
-	player4.Split(hand4)
+	hand4.Split()
 	fmt.Printf("Diana's Hand 1: %s\n", player4.Hands()[0].String())
 	fmt.Printf("Diana's Hand 1 Actions: %s\n", player4.Hands()[0].ActionSummary())
 	fmt.Printf("Diana's Hand 2: %s\n", player4.Hands()[1].String())

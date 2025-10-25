@@ -362,14 +362,46 @@ func (h *Hand) DoubleDownHit(card cards.Card) {
 
 // CanSplit returns true if the hand can be split (two cards of same rank)
 func (h *Hand) CanSplit() bool {
-	if len(h.cards) != 2 {
+	if len(h.player.Hands()) >= 4 ||
+		len(h.cards) != 2 ||
+		!h.player.chipManager.HasEnoughChips(h.Bet()) {
 		return false
 	}
 	return h.cards[0].Rank == h.cards[1].Rank
 }
 
-// SplitHand splits the hand into two hands, returning the second hand
-func (h *Hand) SplitHand() *Hand {
+// Split splits the player's hand into two hands
+func (h *Hand) Split() error {
+	if !h.CanSplit() {
+		return fmt.Errorf("cannot split")
+	}
+
+	// Record split action before splitting
+	h.RecordAction(ActionSplit, fmt.Sprintf("split into %d hands", len(h.player.Hands())+1))
+
+	// Use the Hand's SplitHand method to get the new hand
+	newHand := h.splitHand()
+	if newHand == nil {
+		return fmt.Errorf("split failed")
+	}
+
+	// Set the same bet on the new hand before adding to slice
+	currentBet := h.Bet()
+	newHand.SetBet(currentBet)
+
+	// Record split action on the new hand too
+	newHand.RecordAction(ActionSplit, "created from split")
+
+	// Add the new hand to the player's hands
+	h.player.hands = append(h.player.hands, newHand)
+
+	// Deduct from chips for the new hand's bet
+	err := h.player.chipManager.DeductChips(currentBet)
+	return err
+}
+
+// splitHand splits the hand into two hands
+func (h *Hand) splitHand() *Hand {
 	if !h.CanSplit() {
 		return nil
 	}

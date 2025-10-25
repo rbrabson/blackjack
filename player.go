@@ -90,42 +90,6 @@ func (p *Player) SetActive(active bool) {
 	p.active = active
 }
 
-// Split splits the player's hand into two hands
-func (p *Player) Split(hand *Hand) error {
-	if !p.CanSplit(hand) {
-		return fmt.Errorf("cannot split")
-	}
-
-	// Record split action before splitting
-	hand.RecordAction(ActionSplit, fmt.Sprintf("split into %d hands", len(p.hands)+1))
-
-	// Use the Hand's SplitHand method to get the new hand
-	newHand := hand.SplitHand()
-	if newHand == nil {
-		return fmt.Errorf("split failed")
-	}
-
-	// Set the same bet on the new hand before adding to slice
-	currentBet := hand.Bet()
-	newHand.SetBet(currentBet)
-
-	// Record split action on the new hand too
-	newHand.RecordAction(ActionSplit, "created from split")
-
-	// Add the new hand to the player's hands
-	p.hands = append(p.hands, newHand)
-
-	// Deduct from chips for the new hand's bet
-	err := p.chipManager.DeductChips(currentBet)
-	return err
-}
-
-// CanSplit returns true if the player can split their hand
-func (p *Player) CanSplit(hand *Hand) bool {
-	// Can only split if we have enough chips, the hand can be split, and we have fewer than 4 hands (maximum allowed)
-	return len(p.hands) < 4 && hand.CanSplit() && p.chipManager.HasEnoughChips(hand.Bet())
-}
-
 // ClearHand clears all of the player's hands for a new round
 func (p *Player) ClearHand() {
 	// Reset to a single hand
