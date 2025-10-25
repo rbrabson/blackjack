@@ -310,7 +310,7 @@ func playerTurns(game *blackjack.Game) {
 						continue
 					}
 
-					err := game.PlayerSplit(player.Name())
+					err := currentHand.Split()
 					if err != nil {
 						fmt.Printf("Error: %v\n", err)
 						continue

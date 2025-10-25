@@ -90,8 +90,8 @@ func (p *Player) SetActive(active bool) {
 	p.active = active
 }
 
-// ClearHand clears all of the player's hands for a new round
-func (p *Player) ClearHand() {
+// ClearHands clears all of the player's hands for a new round
+func (p *Player) ClearHands() {
 	// Reset to a single hand
 	p.hands = []*Hand{NewHand(p)}
 	p.currentHandIdx = 0
@@ -143,8 +143,7 @@ func (p *Player) HasActiveHands() bool {
 		return false
 	}
 
-	for i := p.currentHandIdx; i < len(p.hands); i++ {
-		hand := p.hands[i]
+	for _, hand := range p.hands {
 		if !hand.IsBusted() && !hand.IsBlackjack() && !hand.IsStood() {
 			return true
 		}
@@ -154,9 +153,9 @@ func (p *Player) HasActiveHands() bool {
 
 // MoveToNextActiveHand moves to the next active hand, returns true if successful
 func (p *Player) MoveToNextActiveHand() bool {
-	for i := p.currentHandIdx + 1; i < len(p.hands); i++ {
-		if !p.hands[i].IsBusted() && !p.hands[i].IsBlackjack() && !p.hands[i].IsStood() {
-			p.currentHandIdx = i
+	for idx, hand := range p.hands {
+		if !hand.IsBusted() && !hand.IsBlackjack() && !hand.IsStood() {
+			p.currentHandIdx = idx
 			return true
 		}
 	}
@@ -165,9 +164,9 @@ func (p *Player) MoveToNextActiveHand() bool {
 
 // GetAllHandValues returns the values of all hands
 func (p *Player) GetAllHandValues() []int {
-	values := make([]int, len(p.hands))
-	for i, hand := range p.hands {
-		values[i] = hand.Value()
+	values := make([]int, len(p.hands), 0)
+	for _, hand := range p.hands {
+		values = append(values, hand.Value())
 	}
 	return values
 }

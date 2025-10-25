@@ -124,7 +124,7 @@ func (bg *Game) StartNewRound() error {
 	// Clear all hands
 	bg.dealer.ClearHand()
 	for _, player := range bg.players {
-		player.ClearHand()
+		player.ClearHands()
 		player.SetActive(true)
 	}
 
@@ -219,45 +219,6 @@ func (bg *Game) PlayerDoubleDownHit(playerName string) error {
 	}
 
 	player.CurrentHand().DoubleDownHit(card)
-	return nil
-}
-
-// PlayerSplit handles a player splitting their hand
-func (bg *Game) PlayerSplit(playerName string) error {
-	player := bg.GetPlayer(playerName)
-	if player == nil {
-		return fmt.Errorf("player %s not found", playerName)
-	}
-
-	if !player.IsActive() {
-		return fmt.Errorf("player %s is not active", playerName)
-	}
-
-	if !player.CurrentHand().CanSplit() {
-		return fmt.Errorf("player %s cannot split", playerName)
-	}
-
-	// Split the hand
-	err := player.CurrentHand().Split()
-	if err != nil {
-		return fmt.Errorf("failed to split hand: %w", err)
-	}
-
-	// Deal a second card to each of the split hands
-	hands := player.Hands()
-	for i := len(hands) - 2; i < len(hands); i++ { // Last two hands are the split hands
-		card, err := bg.shoe.Draw()
-		if err != nil {
-			return fmt.Errorf("failed to deal card to split hand: %w", err)
-		}
-
-		// Temporarily set the hand to add the card
-		originalHandIdx := player.GetCurrentHandIndex()
-		player.SetCurrentHandIndex(i)
-		player.CurrentHand().Hit(card)
-		player.SetCurrentHandIndex(originalHandIdx)
-	}
-
 	return nil
 }
 
