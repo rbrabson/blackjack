@@ -20,7 +20,6 @@ type Player struct {
 func NewPlayer(name string, options ...Option) *Player {
 	player := &Player{
 		name:           name,
-		hands:          []*Hand{NewHand()},
 		chipManager:    NewDefaultChipManager(0),
 		active:         true,
 		currentHandIdx: 0,
@@ -28,6 +27,7 @@ func NewPlayer(name string, options ...Option) *Player {
 	for _, option := range options {
 		option(player)
 	}
+	player.hands = []*Hand{NewHand(player.chipManager)}
 	return player
 }
 
@@ -83,8 +83,8 @@ func (p *Player) AddChips(amount int) {
 }
 
 // Bet returns the player's current hand bet
-func (p *Player) Bet() int {
-	return p.CurrentHand().Bet()
+func (p *Player) Bet(hand *Hand) int {
+	return hand.Bet()
 }
 
 // IsActive returns whether the player is still active in the game
@@ -98,7 +98,7 @@ func (p *Player) SetActive(active bool) {
 }
 
 // PlaceBet places a bet for the player's current hand
-func (p *Player) PlaceBet(amount int) error {
+func (p *Player) PlaceBet(hand *Hand, amount int) error {
 	if amount <= 0 {
 		return fmt.Errorf("bet must be positive")
 	}
@@ -107,41 +107,12 @@ func (p *Player) PlaceBet(amount int) error {
 	}
 
 	// Set bet on current hand and deduct from chips
-	p.CurrentHand().SetBet(amount)
-	return p.chipManager.DeductChips(amount)
-}
-
-// PlaceBetOnHand places a bet for a specific hand (useful for splits)
-func (p *Player) PlaceBetOnHand(handIndex int, amount int) error {
-	if handIndex < 0 || handIndex >= len(p.hands) {
-		return fmt.Errorf("invalid hand index: %d", handIndex)
-	}
-	if amount <= 0 {
-		return fmt.Errorf("bet must be positive")
-	}
-	if !p.chipManager.HasEnoughChips(amount) {
-		return fmt.Errorf("insufficient chips: have %d, need %d", p.chipManager.GetChips(), amount)
-	}
-
-	p.hands[handIndex].SetBet(amount)
+	hand.SetBet(amount)
 	return p.chipManager.DeductChips(amount)
 }
 
 // WinBet adds winnings to the player's chips for the current hand
-func (p *Player) WinBet(multiplier float64) {
-	hand := p.CurrentHand()
-	winnings := int(float64(hand.Bet()) * multiplier)
-	totalPayout := hand.Bet() + winnings
-	p.chipManager.AddChips(totalPayout)
-	hand.SetWinnings(winnings)
-}
-
-// WinBetOnHand adds winnings to the player's chips for a specific hand
-func (p *Player) WinBetOnHand(handIndex int, multiplier float64) {
-	if handIndex < 0 || handIndex >= len(p.hands) {
-		return
-	}
-	hand := p.hands[handIndex]
+func (p *Player) WinBet(hand *Hand, multiplier float64) {
 	winnings := int(float64(hand.Bet()) * multiplier)
 	totalPayout := hand.Bet() + winnings
 	p.chipManager.AddChips(totalPayout)
@@ -149,111 +120,87 @@ func (p *Player) WinBetOnHand(handIndex int, multiplier float64) {
 }
 
 // LoseBet removes the player's bet for the current hand (already deducted when placed)
-func (p *Player) LoseBet() {
-	hand := p.CurrentHand()
-	hand.SetWinnings(-hand.Bet()) // Record the loss
-}
-
-// LoseBetOnHand removes the player's bet for a specific hand
-func (p *Player) LoseBetOnHand(handIndex int) {
-	if handIndex < 0 || handIndex >= len(p.hands) {
-		return
-	}
-	hand := p.hands[handIndex]
+func (p *Player) LoseBet(hand *Hand) {
 	hand.SetWinnings(-hand.Bet()) // Record the loss
 }
 
 // PushBet returns the bet to the player for the current hand (tie)
-func (p *Player) PushBet() {
-	hand := p.CurrentHand()
-	p.chipManager.AddChips(hand.Bet())
-	hand.SetWinnings(0) // No win or loss
-}
-
-// PushBetOnHand returns the bet to the player for a specific hand
-func (p *Player) PushBetOnHand(handIndex int) {
-	if handIndex < 0 || handIndex >= len(p.hands) {
-		return
-	}
-	hand := p.hands[handIndex]
+func (p *Player) PushBet(hand *Hand) {
 	p.chipManager.AddChips(hand.Bet())
 	hand.SetWinnings(0) // No win or loss
 }
 
 // Surrender allows the player to forfeit their hand and lose half their bet
-func (p *Player) Surrender() {
-	currentBet := p.CurrentHand().Bet()
+func (p *Player) Surrender(hand *Hand) {
+	currentBet := hand.Bet()
 	halfBet := currentBet / 2
 	p.chipManager.AddChips(halfBet)
-	p.CurrentHand().SetWinnings(-halfBet) // Record the loss of half bet
-	p.CurrentHand().SetBet(0)
-	p.CurrentHand().RecordAction(ActionSurrender, fmt.Sprintf("received %d chips back", halfBet))
-	p.CurrentHand().Stand()
+	hand.SetWinnings(-halfBet) // Record the loss of half bet
+	hand.SetBet(0)
+	hand.RecordAction(ActionSurrender, fmt.Sprintf("received %d chips back", halfBet))
+	hand.Stand()
 }
 
 // CanSurrender returns true if the player can surrender (typically only on first two cards)
-func (p *Player) CanSurrender() bool {
-	currentHand := p.CurrentHand()
-	return len(p.Hands()) == 1 && currentHand.Count() == 2 && !currentHand.IsStood() && !currentHand.IsBusted()
+func (p *Player) CanSurrender(hand *Hand) bool {
+	return len(p.Hands()) == 1 && hand.Count() == 2 && !hand.IsStood() && !hand.IsBusted()
 }
 
 // Hit adds a card to the player's hand
-func (p *Player) Hit(card cards.Card) {
+func (p *Player) Hit(hand *Hand, card cards.Card) {
 	// Use AddCardWithAction to specify this is a hit
-	p.CurrentHand().AddCardWithAction(card, ActionHit, "player hit")
+	hand.AddCardWithAction(card, ActionHit, "player hit")
 }
 
 // DealCard adds a card to the player's hand as part of the initial deal
-func (p *Player) DealCard(card cards.Card) {
-	p.CurrentHand().AddCardWithAction(card, ActionDeal, "initial deal")
+func (p *Player) DealCard(hand *Hand, card cards.Card) {
+	hand.AddCardWithAction(card, ActionDeal, "initial deal")
 }
 
 // DoubleDownHit adds a card to the player's hand as part of a double down
-func (p *Player) DoubleDownHit(card cards.Card) {
-	p.CurrentHand().AddCardWithAction(card, ActionDouble, "double down card")
+func (p *Player) DoubleDownHit(hand *Hand, card cards.Card) {
+	hand.AddCardWithAction(card, ActionDouble, "double down card")
 }
 
 // CanDoubleDown returns true if the player can double down
-func (p *Player) CanDoubleDown() bool {
-	return p.CurrentHand().Count() == 2 && p.chipManager.HasEnoughChips(p.CurrentHand().Bet())
+func (p *Player) CanDoubleDown(hand *Hand) bool {
+	return hand.Count() == 2 && p.chipManager.HasEnoughChips(hand.Bet())
 }
 
 // DoubleDown doubles the player's bet and they get exactly one more card
-func (p *Player) DoubleDown() error {
-	if !p.CanDoubleDown() {
+func (p *Player) DoubleDown(hand *Hand) error {
+	if !p.CanDoubleDown(hand) {
 		return fmt.Errorf("cannot double down")
 	}
 
-	currentBet := p.CurrentHand().Bet()
+	currentBet := hand.Bet()
 	err := p.chipManager.DeductChips(currentBet)
 	if err != nil {
 		return err
 	}
 	newBet := currentBet * 2
-	p.CurrentHand().SetBet(newBet)
-	p.CurrentHand().RecordAction(ActionDouble, fmt.Sprintf("bet increased from %d to %d", currentBet, newBet))
+	hand.SetBet(newBet)
+	hand.RecordAction(ActionDouble, fmt.Sprintf("bet increased from %d to %d", currentBet, newBet))
 	return nil
 }
 
 // Split splits the player's hand into two hands
-func (p *Player) Split() error {
-	if !p.CanSplit() {
+func (p *Player) Split(hand *Hand) error {
+	if !p.CanSplit(hand) {
 		return fmt.Errorf("cannot split")
 	}
 
-	currentHand := p.CurrentHand()
-
 	// Record split action before splitting
-	currentHand.RecordAction(ActionSplit, fmt.Sprintf("split into %d hands", len(p.hands)+1))
+	hand.RecordAction(ActionSplit, fmt.Sprintf("split into %d hands", len(p.hands)+1))
 
 	// Use the Hand's SplitHand method to get the new hand
-	newHand := currentHand.SplitHand()
+	newHand := hand.SplitHand()
 	if newHand == nil {
 		return fmt.Errorf("split failed")
 	}
 
 	// Set the same bet on the new hand before adding to slice
-	currentBet := currentHand.Bet()
+	currentBet := hand.Bet()
 	newHand.SetBet(currentBet)
 
 	// Record split action on the new hand too
@@ -268,15 +215,15 @@ func (p *Player) Split() error {
 }
 
 // CanSplit returns true if the player can split their hand
-func (p *Player) CanSplit() bool {
+func (p *Player) CanSplit(hand *Hand) bool {
 	// Can only split if we have enough chips, the hand can be split, and we have fewer than 4 hands (maximum allowed)
-	return len(p.hands) < 4 && p.CurrentHand().CanSplit() && p.chipManager.HasEnoughChips(p.CurrentHand().Bet())
+	return len(p.hands) < 4 && hand.CanSplit() && p.chipManager.HasEnoughChips(hand.Bet())
 }
 
 // ClearHand clears all of the player's hands for a new round
 func (p *Player) ClearHand() {
 	// Reset to a single hand
-	p.hands = []*Hand{NewHand()}
+	p.hands = []*Hand{NewHand(p.chipManager)}
 	p.currentHandIdx = 0
 }
 
