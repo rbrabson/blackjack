@@ -189,6 +189,20 @@ func (h *Hand) Value() int {
 	return value
 }
 
+// PlaceBet places a bet for the player's current hand
+func (h *Hand) PlaceBet(amount int) error {
+	if amount <= 0 {
+		return fmt.Errorf("bet must be positive")
+	}
+	if !h.player.chipManager.HasEnoughChips(amount) {
+		return fmt.Errorf("insufficient chips: have %d, need %d", h.player.chipManager.GetChips(), amount)
+	}
+
+	// Set bet on current hand and deduct from chips
+	h.SetBet(amount)
+	return h.player.chipManager.DeductChips(amount)
+}
+
 // IsBusted returns true if the hand value is over 21
 func (h *Hand) IsBusted() bool {
 	return h.Value() > 21

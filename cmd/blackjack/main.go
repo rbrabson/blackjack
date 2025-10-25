@@ -170,7 +170,8 @@ func placeBets(game *blackjack.Game) bool {
 				continue
 			}
 
-			err = player.PlaceBet(player.CurrentHand(), bet)
+			hand := player.CurrentHand()
+			err = hand.PlaceBet(bet)
 			if err != nil {
 				fmt.Printf("Error: %v\n", err)
 				continue

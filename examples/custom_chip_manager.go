@@ -73,7 +73,8 @@ func main() {
 	fmt.Println("\nTesting Bob's daily limit...")
 
 	// This should work (under limit)
-	err := bob.PlaceBet(bob.CurrentHand(), 300)
+	bobHand := bob.CurrentHand()
+	err := bobHand.PlaceBet(300)
 	if err != nil {
 		fmt.Printf("Error placing 300 chip bet: %v\n", err)
 	} else {
@@ -82,7 +83,7 @@ func main() {
 	}
 
 	// This should fail (exceeds daily limit)
-	err = bob.PlaceBet(bob.CurrentHand(), 300)
+	err = bobHand.PlaceBet(300)
 	if err != nil {
 		fmt.Printf("Error placing second 300 chip bet: %v\n", err)
 	} else {
@@ -91,7 +92,8 @@ func main() {
 
 	// Alice shouldn't have this limitation
 	alice := game.GetPlayer("Alice")
-	err = alice.PlaceBet(alice.CurrentHand(), 600)
+	aliceHand := alice.CurrentHand()
+	err = aliceHand.PlaceBet(600)
 	if err != nil {
 		fmt.Printf("Error with Alice's 600 chip bet: %v\n", err)
 	} else {

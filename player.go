@@ -92,20 +92,6 @@ func (p *Player) SetActive(active bool) {
 	p.active = active
 }
 
-// PlaceBet places a bet for the player's current hand
-func (p *Player) PlaceBet(hand *Hand, amount int) error {
-	if amount <= 0 {
-		return fmt.Errorf("bet must be positive")
-	}
-	if !p.chipManager.HasEnoughChips(amount) {
-		return fmt.Errorf("insufficient chips: have %d, need %d", p.chipManager.GetChips(), amount)
-	}
-
-	// Set bet on current hand and deduct from chips
-	hand.SetBet(amount)
-	return p.chipManager.DeductChips(amount)
-}
-
 // WinBet adds winnings to the player's chips for the current hand
 func (p *Player) WinBet(hand *Hand, multiplier float64) {
 	winnings := int(float64(hand.Bet()) * multiplier)
