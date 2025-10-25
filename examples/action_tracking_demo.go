@@ -18,8 +18,8 @@ func demonstrateActionTracking() {
 	// Simulate initial deal
 	fmt.Println("\n📋 Initial Deal:")
 	hand := player.CurrentHand()
-	player.DealCard(hand, cards.Card{Suit: cards.Spades, Rank: cards.Ten})
-	player.DealCard(hand, cards.Card{Suit: cards.Hearts, Rank: cards.Six})
+	hand.DealCard(cards.Card{Suit: cards.Spades, Rank: cards.Ten})
+	hand.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Six})
 	dealer.DealCard(cards.Card{Suit: cards.Clubs, Rank: cards.King})
 	dealer.DealCard(cards.Card{Suit: cards.Diamonds, Rank: cards.Seven})
 
@@ -30,7 +30,7 @@ func demonstrateActionTracking() {
 
 	// Player hits
 	fmt.Println("\n🃏 Player Hits:")
-	player.Hit(hand, cards.Card{Suit: cards.Spades, Rank: cards.Five})
+	hand.Hit(cards.Card{Suit: cards.Spades, Rank: cards.Five})
 	fmt.Printf("Player Hand: %s\n", player.CurrentHand().String())
 	fmt.Printf("Player Actions: %s\n", player.CurrentHand().ActionSummary())
 
@@ -80,7 +80,7 @@ func demonstrateActionTracking() {
 	fmt.Println("\n💰 Double Down Example:")
 	player2 := blackjack.NewPlayer("Bob", blackjack.WithChips(1000))
 	hand2 := player2.CurrentHand()
-	player2.DealCard(hand2, cards.Card{Suit: cards.Hearts, Rank: cards.Two})
+	hand2.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Two})
 	hand2.PlaceBet(50)
 
 	player2.DoubleDown(hand2)
@@ -92,8 +92,8 @@ func demonstrateActionTracking() {
 	fmt.Println("\n🏳️ Surrender Example:")
 	player3 := blackjack.NewPlayer("Charlie", blackjack.WithChips(1000))
 	hand3 := player3.CurrentHand()
-	player3.DealCard(hand3, cards.Card{Suit: cards.Spades, Rank: cards.Ten})
-	player3.DealCard(hand3, cards.Card{Suit: cards.Hearts, Rank: cards.Six})
+	hand3.DealCard(cards.Card{Suit: cards.Spades, Rank: cards.Ten})
+	hand3.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Six})
 	hand3.PlaceBet(100)
 
 	hand3.Surrender()
@@ -104,8 +104,8 @@ func demonstrateActionTracking() {
 	fmt.Println("\n✂️ Split Example:")
 	player4 := blackjack.NewPlayer("Diana", blackjack.WithChips(1000))
 	hand4 := player4.CurrentHand()
-	player4.DealCard(hand4, cards.Card{Suit: cards.Spades, Rank: cards.Eight})
-	player4.DealCard(hand4, cards.Card{Suit: cards.Hearts, Rank: cards.Eight})
+	hand4.DealCard(cards.Card{Suit: cards.Spades, Rank: cards.Eight})
+	hand4.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Eight})
 	hand4.PlaceBet(75)
 
 	player4.Split(hand4)

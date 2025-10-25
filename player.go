@@ -92,17 +92,6 @@ func (p *Player) SetActive(active bool) {
 	p.active = active
 }
 
-// Hit adds a card to the player's hand
-func (p *Player) Hit(hand *Hand, card cards.Card) {
-	// Use AddCardWithAction to specify this is a hit
-	hand.AddCardWithAction(card, ActionHit, "player hit")
-}
-
-// DealCard adds a card to the player's hand as part of the initial deal
-func (p *Player) DealCard(hand *Hand, card cards.Card) {
-	hand.AddCardWithAction(card, ActionDeal, "initial deal")
-}
-
 // DoubleDownHit adds a card to the player's hand as part of a double down
 func (p *Player) DoubleDownHit(hand *Hand, card cards.Card) {
 	hand.AddCardWithAction(card, ActionDouble, "double down card")

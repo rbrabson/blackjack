@@ -308,6 +308,17 @@ func (h *Hand) SetActive(active bool) {
 	h.isActive = active
 }
 
+// Hit adds a card to the player's hand
+func (h *Hand) Hit(card cards.Card) {
+	// Use AddCardWithAction to specify this is a hit
+	h.AddCardWithAction(card, ActionHit, "player hit")
+}
+
+// DealCard adds a card to the player's hand as part of the initial deal
+func (h *Hand) DealCard(card cards.Card) {
+	h.AddCardWithAction(card, ActionDeal, "initial deal")
+}
+
 // IsStood returns true if the player has stood on this hand
 func (h *Hand) IsStood() bool {
 	return h.isStood

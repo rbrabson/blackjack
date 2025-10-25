@@ -146,7 +146,7 @@ func (bg *Game) DealInitialCards() error {
 			if err != nil {
 				return fmt.Errorf("failed to deal card to %s: %w", player.Name(), err)
 			}
-			player.DealCard(player.CurrentHand(), card)
+			player.CurrentHand().DealCard(card)
 		}
 	}
 
@@ -164,7 +164,7 @@ func (bg *Game) DealInitialCards() error {
 			if err != nil {
 				return fmt.Errorf("failed to deal card to %s: %w", player.Name(), err)
 			}
-			player.DealCard(player.CurrentHand(), card)
+			player.CurrentHand().DealCard(card)
 		}
 	}
 
@@ -198,7 +198,7 @@ func (bg *Game) PlayerHit(playerName string) error {
 		return fmt.Errorf("failed to deal card: %w", err)
 	}
 
-	player.Hit(player.CurrentHand(), card)
+	player.CurrentHand().Hit(card)
 	return nil
 }
 
@@ -254,7 +254,7 @@ func (bg *Game) PlayerSplit(playerName string) error {
 		// Temporarily set the hand to add the card
 		originalHandIdx := player.GetCurrentHandIndex()
 		player.SetCurrentHandIndex(i)
-		player.Hit(player.CurrentHand(), card)
+		player.CurrentHand().Hit(card)
 		player.SetCurrentHandIndex(originalHandIdx)
 	}
 
