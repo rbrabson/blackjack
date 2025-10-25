@@ -175,10 +175,3 @@ func (p *Player) GetAllHandValues() []int {
 func (p *Player) GetCurrentHandIndex() int {
 	return p.currentHandIdx
 }
-
-// SetCurrentHandIndex sets the current hand index (for internal use)
-func (p *Player) SetCurrentHandIndex(index int) {
-	if index >= 0 && index < len(p.hands) {
-		p.currentHandIdx = index
-	}
-}
