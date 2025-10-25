@@ -14,7 +14,7 @@ type Dealer struct {
 // NewDealer creates a new dealer
 func NewDealer() *Dealer {
 	return &Dealer{
-		hand: NewHand(),
+		hand: NewDealerHand(),
 	}
 }
 

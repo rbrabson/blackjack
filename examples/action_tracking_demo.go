@@ -12,13 +12,14 @@ func demonstrateActionTracking() {
 	fmt.Println("================================")
 
 	// Create a player and dealer
-	player := blackjack.NewPlayer("Alice", 1000)
+	player := blackjack.NewPlayer("Alice", blackjack.WithChips(1000))
 	dealer := blackjack.NewDealer()
 
 	// Simulate initial deal
 	fmt.Println("\n📋 Initial Deal:")
-	player.DealCard(cards.Card{Suit: cards.Spades, Rank: cards.Ten})
-	player.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Six})
+	hand := player.CurrentHand()
+	hand.DealCard(cards.Card{Suit: cards.Spades, Rank: cards.Ten})
+	hand.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Six})
 	dealer.DealCard(cards.Card{Suit: cards.Clubs, Rank: cards.King})
 	dealer.DealCard(cards.Card{Suit: cards.Diamonds, Rank: cards.Seven})
 
@@ -29,7 +30,7 @@ func demonstrateActionTracking() {
 
 	// Player hits
 	fmt.Println("\n🃏 Player Hits:")
-	player.Hit(cards.Card{Suit: cards.Spades, Rank: cards.Five})
+	hand.Hit(cards.Card{Suit: cards.Spades, Rank: cards.Five})
 	fmt.Printf("Player Hand: %s\n", player.CurrentHand().String())
 	fmt.Printf("Player Actions: %s\n", player.CurrentHand().ActionSummary())
 
@@ -77,35 +78,37 @@ func demonstrateActionTracking() {
 
 	// Double Down example
 	fmt.Println("\n💰 Double Down Example:")
-	player2 := blackjack.NewPlayer("Bob", 1000)
-	player2.DealCard(cards.Card{Suit: cards.Spades, Rank: cards.Nine})
-	player2.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Two})
-	player2.PlaceBet(50)
+	player2 := blackjack.NewPlayer("Bob", blackjack.WithChips(1000))
+	hand2 := player2.CurrentHand()
+	hand2.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Two})
+	hand2.PlaceBet(50)
 
-	player2.DoubleDown()
-	player2.DoubleDownHit(cards.Card{Suit: cards.Clubs, Rank: cards.Ten})
+	hand2.DoubleDown()
+	hand2.DoubleDownHit(cards.Card{Suit: cards.Clubs, Rank: cards.Ten})
 	fmt.Printf("Bob's Hand: %s\n", player2.CurrentHand().String())
 	fmt.Printf("Bob's Actions: %s\n", player2.CurrentHand().ActionSummary())
 
 	// Surrender example
 	fmt.Println("\n🏳️ Surrender Example:")
-	player3 := blackjack.NewPlayer("Charlie", 1000)
-	player3.DealCard(cards.Card{Suit: cards.Spades, Rank: cards.Ten})
-	player3.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Six})
-	player3.PlaceBet(100)
+	player3 := blackjack.NewPlayer("Charlie", blackjack.WithChips(1000))
+	hand3 := player3.CurrentHand()
+	hand3.DealCard(cards.Card{Suit: cards.Spades, Rank: cards.Ten})
+	hand3.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Six})
+	hand3.PlaceBet(100)
 
-	player3.Surrender()
+	hand3.Surrender()
 	fmt.Printf("Charlie's Hand: %s\n", player3.CurrentHand().String())
 	fmt.Printf("Charlie's Actions: %s\n", player3.CurrentHand().ActionSummary())
 
 	// Split example
 	fmt.Println("\n✂️ Split Example:")
-	player4 := blackjack.NewPlayer("Diana", 1000)
-	player4.DealCard(cards.Card{Suit: cards.Spades, Rank: cards.Eight})
-	player4.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Eight})
-	player4.PlaceBet(75)
+	player4 := blackjack.NewPlayer("Diana", blackjack.WithChips(1000))
+	hand4 := player4.CurrentHand()
+	hand4.DealCard(cards.Card{Suit: cards.Spades, Rank: cards.Eight})
+	hand4.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Eight})
+	hand4.PlaceBet(75)
 
-	player4.Split()
+	hand4.Split()
 	fmt.Printf("Diana's Hand 1: %s\n", player4.Hands()[0].String())
 	fmt.Printf("Diana's Hand 1 Actions: %s\n", player4.Hands()[0].ActionSummary())
 	fmt.Printf("Diana's Hand 2: %s\n", player4.Hands()[1].String())

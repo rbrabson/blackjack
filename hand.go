@@ -37,10 +37,16 @@ type Hand struct {
 	actions  []Action     // All actions taken on this hand
 	bet      int          // The bet amount for this specific hand
 	winnings int          // The winnings for this specific hand (can be negative for losses)
+	player   *Player      // The player who owns this hand (nil for dealer)
+}
+
+// NewDealerHand creates a new dealer hand without a chip manager
+func NewDealerHand() *Hand {
+	return NewHand(nil)
 }
 
 // NewHand creates a new empty hand
-func NewHand() *Hand {
+func NewHand(player *Player) *Hand {
 	return &Hand{
 		cards:    make([]cards.Card, 0, 2),
 		isSplit:  false,
@@ -49,12 +55,13 @@ func NewHand() *Hand {
 		actions:  make([]Action, 0, 1),
 		bet:      0,
 		winnings: 0,
+		player:   player,
 	}
 }
 
-// NewSplitHand creates a new hand from a split with the initial card
-func NewSplitHand(card cards.Card) *Hand {
-	h := NewHand()
+// newSplitHand creates a new hand from a split with the initial card
+func newSplitHand(card cards.Card, player *Player) *Hand {
+	h := NewHand(player)
 	h.isSplit = true
 	h.AddCardWithAction(card, ActionDeal, "split card")
 
@@ -182,6 +189,39 @@ func (h *Hand) Value() int {
 	return value
 }
 
+// PlaceBet places a bet for the player's current hand
+func (h *Hand) PlaceBet(amount int) error {
+	if amount <= 0 {
+		return fmt.Errorf("bet must be positive")
+	}
+	if !h.player.chipManager.HasEnoughChips(amount) {
+		return fmt.Errorf("insufficient chips: have %d, need %d", h.player.chipManager.GetChips(), amount)
+	}
+
+	// Set bet on current hand and deduct from chips
+	h.SetBet(amount)
+	return h.player.chipManager.DeductChips(amount)
+}
+
+// WinBet adds winnings to the player's chips for the current hand
+func (h *Hand) WinBet(multiplier float64) {
+	winnings := int(float64(h.Bet()) * multiplier)
+	totalPayout := h.Bet() + winnings
+	h.player.chipManager.AddChips(totalPayout)
+	h.SetWinnings(winnings)
+}
+
+// LoseBet removes the player's bet for the current hand (already deducted when placed)
+func (h *Hand) LoseBet() {
+	h.SetWinnings(-h.Bet()) // Record the loss
+}
+
+// PushBet returns the bet to the player for the current hand (tie)
+func (h *Hand) PushBet() {
+	h.player.chipManager.AddChips(h.Bet())
+	h.SetWinnings(0) // No win or loss
+}
+
 // IsBusted returns true if the hand value is over 21
 func (h *Hand) IsBusted() bool {
 	return h.Value() > 21
@@ -268,6 +308,17 @@ func (h *Hand) SetActive(active bool) {
 	h.isActive = active
 }
 
+// Hit adds a card to the player's hand
+func (h *Hand) Hit(card cards.Card) {
+	// Use AddCardWithAction to specify this is a hit
+	h.AddCardWithAction(card, ActionHit, "player hit")
+}
+
+// DealCard adds a card to the player's hand as part of the initial deal
+func (h *Hand) DealCard(card cards.Card) {
+	h.AddCardWithAction(card, ActionDeal, "initial deal")
+}
+
 // IsStood returns true if the player has stood on this hand
 func (h *Hand) IsStood() bool {
 	return h.isStood
@@ -280,16 +331,77 @@ func (h *Hand) Stand() {
 	h.RecordAction(ActionStand, "")
 }
 
+// CanDoubleDown returns true if the hand can be doubled down
+func (h *Hand) CanDoubleDown() bool {
+	return len(h.cards) == 2 && h.player.chipManager != nil && h.player.chipManager.HasEnoughChips(h.bet)
+}
+
+// DoubleDown performs the double down action on the hand
+func (h *Hand) DoubleDown() error {
+	if !h.CanDoubleDown() {
+		return fmt.Errorf("cannot double down on this hand")
+	}
+
+	// Deduct additional bet from chip manager
+	err := h.player.chipManager.DeductChips(h.bet)
+	if err != nil {
+		return fmt.Errorf("failed to deduct chips for double down: %v", err)
+	}
+
+	h.bet *= 2
+	h.Stand()
+	h.RecordAction(ActionDouble, fmt.Sprintf("bet increased from %d to %d", h.bet/2, h.bet))
+
+	return nil
+}
+
+// DoubleDownHit adds a card to the player's hand as part of a double down
+func (h *Hand) DoubleDownHit(card cards.Card) {
+	h.AddCardWithAction(card, ActionDouble, "double down card")
+}
+
 // CanSplit returns true if the hand can be split (two cards of same rank)
 func (h *Hand) CanSplit() bool {
-	if len(h.cards) != 2 {
+	if len(h.player.Hands()) >= 4 ||
+		len(h.cards) != 2 ||
+		!h.player.chipManager.HasEnoughChips(h.Bet()) {
 		return false
 	}
 	return h.cards[0].Rank == h.cards[1].Rank
 }
 
-// SplitHand splits the hand into two hands, returning the second hand
-func (h *Hand) SplitHand() *Hand {
+// Split splits the player's hand into two hands
+func (h *Hand) Split() error {
+	if !h.CanSplit() {
+		return fmt.Errorf("cannot split")
+	}
+
+	// Record split action before splitting
+	h.RecordAction(ActionSplit, fmt.Sprintf("split into %d hands", len(h.player.Hands())+1))
+
+	// Use the Hand's SplitHand method to get the new hand
+	newHand := h.splitHand()
+	if newHand == nil {
+		return fmt.Errorf("split failed")
+	}
+
+	// Set the same bet on the new hand before adding to slice
+	currentBet := h.Bet()
+	newHand.SetBet(currentBet)
+
+	// Record split action on the new hand too
+	newHand.RecordAction(ActionSplit, "created from split")
+
+	// Add the new hand to the player's hands
+	h.player.hands = append(h.player.hands, newHand)
+
+	// Deduct from chips for the new hand's bet
+	err := h.player.chipManager.DeductChips(currentBet)
+	return err
+}
+
+// splitHand splits the hand into two hands
+func (h *Hand) splitHand() *Hand {
 	if !h.CanSplit() {
 		return nil
 	}
@@ -302,9 +414,25 @@ func (h *Hand) SplitHand() *Hand {
 	h.isSplit = true
 
 	// Create new hand with the second card
-	newHand := NewSplitHand(secondCard)
+	newHand := newSplitHand(secondCard, h.player)
 
 	return newHand
+}
+
+// CanSurrender returns true if the player can surrender (typically only on first two cards)
+func (h *Hand) CanSurrender() bool {
+	return len(h.player.Hands()) == 1 && h.Count() == 2 && !h.IsStood() && !h.IsBusted()
+}
+
+// Surrender allows the player to forfeit their hand and lose half their bet
+func (h *Hand) Surrender() {
+	currentBet := h.Bet()
+	halfBet := currentBet / 2
+	h.player.chipManager.AddChips(halfBet)
+	h.SetWinnings(-halfBet) // Record the loss of half bet
+	h.SetBet(0)
+	h.RecordAction(ActionSurrender, fmt.Sprintf("received %d chips back", halfBet))
+	h.Stand()
 }
 
 // String returns a string representation of the hand

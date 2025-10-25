@@ -68,14 +68,14 @@ func setupPlayers(game *blackjack.Game) {
 			continue
 		}
 
-		game.AddPlayer(name, chips)
+		game.AddPlayer(name, blackjack.WithChips(chips))
 		fmt.Printf("Added %s with %d chips.\n", name, chips)
 	}
 
 	if len(game.Players()) == 0 {
 		// Add a default player if none were added
 		fmt.Println("No players added. Adding default player 'Player1' with 1000 chips.")
-		game.AddPlayer("Player1", 1000)
+		game.AddPlayer("Player1", blackjack.WithChips(1000))
 	}
 }
 
@@ -170,7 +170,8 @@ func placeBets(game *blackjack.Game) bool {
 				continue
 			}
 
-			err = player.PlaceBet(bet)
+			hand := player.CurrentHand()
+			err = hand.PlaceBet(bet)
 			if err != nil {
 				fmt.Printf("Error: %v\n", err)
 				continue
@@ -184,7 +185,8 @@ func placeBets(game *blackjack.Game) bool {
 	// Check if any players placed bets
 	hasActivePlayers := false
 	for _, player := range game.Players() {
-		if player.IsActive() && player.Bet() > 0 {
+		hand := player.CurrentHand()
+		if player.IsActive() && hand.Bet() > 0 {
 			hasActivePlayers = true
 			break
 		}
@@ -197,7 +199,8 @@ func playerTurns(game *blackjack.Game) {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for _, player := range game.Players() {
-		if !player.IsActive() || player.Bet() == 0 {
+		hand := player.CurrentHand()
+		if !player.IsActive() || hand.Bet() == 0 {
 			continue
 		}
 
@@ -209,7 +212,7 @@ func playerTurns(game *blackjack.Game) {
 
 			// Check for player blackjack
 			if currentHand.IsBlackjack() {
-				fmt.Printf("🎯 %s has blackjack on hand %d!\n", player.Name(), player.GetCurrentHandIndex()+1)
+				fmt.Printf("🎯 %s has blackjack on hand %d!\n", player.Name(), player.GetCurrentHandNumber()+1)
 				if !player.MoveToNextActiveHand() {
 					player.SetActive(false)
 					break
@@ -221,7 +224,7 @@ func playerTurns(game *blackjack.Game) {
 			if len(player.Hands()) > 1 {
 				fmt.Printf("\n%s - Hand %d of %d: %s\n",
 					player.Name(),
-					player.GetCurrentHandIndex()+1,
+					player.GetCurrentHandNumber()+1,
 					len(player.Hands()),
 					currentHand.String())
 			} else {
@@ -232,15 +235,15 @@ func playerTurns(game *blackjack.Game) {
 			for currentHand.IsActive() && !currentHand.IsBusted() && !currentHand.IsBlackjack() {
 				fmt.Print("Choose action: (h)it, (s)tand")
 
-				if player.CanDoubleDown() {
+				if currentHand.CanDoubleDown() {
 					fmt.Print(", (d)ouble down")
 				}
 
-				if player.CanSplit() {
+				if currentHand.CanSplit() {
 					fmt.Print(", s(p)lit")
 				}
 
-				if player.CanSurrender() {
+				if currentHand.CanSurrender() {
 					fmt.Print(", s(u)rrender")
 				}
 
@@ -272,12 +275,12 @@ func playerTurns(game *blackjack.Game) {
 					}
 
 				case "d", "double", "double down":
-					if !player.CanDoubleDown() {
+					if !currentHand.CanDoubleDown() {
 						fmt.Println("Cannot double down.")
 						continue
 					}
 
-					err := player.DoubleDown()
+					err := currentHand.DoubleDown()
 					if err != nil {
 						fmt.Printf("Error: %v\n", err)
 						continue
@@ -302,12 +305,12 @@ func playerTurns(game *blackjack.Game) {
 					}
 
 				case "p", "split":
-					if !player.CanSplit() {
+					if !currentHand.CanSplit() {
 						fmt.Println("Cannot split.")
 						continue
 					}
 
-					err := game.PlayerSplit(player.Name())
+					err := currentHand.Split()
 					if err != nil {
 						fmt.Printf("Error: %v\n", err)
 						continue
@@ -318,7 +321,7 @@ func playerTurns(game *blackjack.Game) {
 					fmt.Printf("Current hand: %s\n", currentHand.String())
 
 				case "u", "surrender":
-					if !player.CanSurrender() {
+					if !currentHand.CanSurrender() {
 						fmt.Println("Cannot surrender.")
 						continue
 					}
@@ -351,7 +354,8 @@ func playerTurns(game *blackjack.Game) {
 
 func hasActiveNonBustedPlayers(game *blackjack.Game) bool {
 	for _, player := range game.Players() {
-		if player.Bet() > 0 && !player.CurrentHand().IsBusted() {
+		hand := player.CurrentHand()
+		if hand.Bet() > 0 && !hand.IsBusted() {
 			return true
 		}
 	}
@@ -363,27 +367,21 @@ func showRoundResults(game *blackjack.Game) {
 	fmt.Println("================")
 
 	for _, player := range game.Players() {
-		if player.Bet() == 0 {
-			continue
-		}
-
 		hands := player.Hands()
 		if len(hands) == 1 {
 			// Single hand
-			result := game.EvaluateHand(player)
+			result := game.EvaluateHand(player.CurrentHand())
 			fmt.Printf("%s: %s\n", player.Name(), result.String())
 		} else {
 			// Multiple hands (splits)
 			fmt.Printf("%s:\n", player.Name())
-			for i := 0; i < len(hands); i++ {
+			for idx, hand := range hands {
 				// Temporarily set current hand for evaluation
-				originalHandIdx := player.GetCurrentHandIndex()
-				player.SetCurrentHandIndex(i)
-				result := game.EvaluateHand(player)
-				fmt.Printf("  Hand %d: %s\n", i+1, result.String())
-				player.SetCurrentHandIndex(originalHandIdx)
+				result := game.EvaluateHand(hand)
+				fmt.Printf("  Hand %d: %s\n", idx+1, result.String())
 			}
 		}
+
 		fmt.Printf("  Final Chips: %d\n", player.Chips())
 	}
 }

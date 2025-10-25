@@ -56,11 +56,11 @@ func main() {
 	game := blackjack.New(6)
 
 	// Add a regular player
-	game.AddPlayer("Alice", 1000)
+	game.AddPlayer("Alice", blackjack.WithChips(1000))
 
 	// Add a player with daily spending limits
 	limitedChipManager := NewExampleCustomChipManager(1000, 500) // $500 daily limit
-	game.AddPlayer("Bob", 1000, blackjack.WithChipManager(limitedChipManager))
+	game.AddPlayer("Bob", blackjack.WithChipManager(limitedChipManager), blackjack.WithChips(1000))
 
 	fmt.Println("Game created with 2 players:")
 	for _, player := range game.Players() {
@@ -73,16 +73,17 @@ func main() {
 	fmt.Println("\nTesting Bob's daily limit...")
 
 	// This should work (under limit)
-	err := bob.PlaceBet(300)
+	bobHand := bob.CurrentHand()
+	err := bobHand.PlaceBet(300)
 	if err != nil {
 		fmt.Printf("Error placing 300 chip bet: %v\n", err)
 	} else {
 		fmt.Printf("Successfully placed 300 chip bet. Remaining chips: %d\n", bob.Chips())
-		bob.LoseBet() // Simulate losing the bet
+		bobHand.LoseBet() // Simulate losing the bet
 	}
 
 	// This should fail (exceeds daily limit)
-	err = bob.PlaceBet(300)
+	err = bobHand.PlaceBet(300)
 	if err != nil {
 		fmt.Printf("Error placing second 300 chip bet: %v\n", err)
 	} else {
@@ -91,7 +92,8 @@ func main() {
 
 	// Alice shouldn't have this limitation
 	alice := game.GetPlayer("Alice")
-	err = alice.PlaceBet(600)
+	aliceHand := alice.CurrentHand()
+	err = aliceHand.PlaceBet(600)
 	if err != nil {
 		fmt.Printf("Error with Alice's 600 chip bet: %v\n", err)
 	} else {

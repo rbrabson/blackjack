@@ -55,8 +55,8 @@ func New(numDecks int) *Game {
 }
 
 // AddPlayer adds a player to the game
-func (bg *Game) AddPlayer(name string, chips int, options ...Option) {
-	player := NewPlayer(name, chips, options...)
+func (bg *Game) AddPlayer(name string, options ...Option) {
+	player := NewPlayer(name, options...)
 	bg.players = append(bg.players, player)
 }
 
@@ -124,7 +124,7 @@ func (bg *Game) StartNewRound() error {
 	// Clear all hands
 	bg.dealer.ClearHand()
 	for _, player := range bg.players {
-		player.ClearHand()
+		player.ClearHands()
 		player.SetActive(true)
 	}
 
@@ -142,11 +142,13 @@ func (bg *Game) DealInitialCards() error {
 	// Deal first card to each player
 	for _, player := range bg.players {
 		if player.IsActive() {
-			card, err := bg.shoe.Draw()
-			if err != nil {
-				return fmt.Errorf("failed to deal card to %s: %w", player.Name(), err)
+			for _, hand := range player.hands {
+				card, err := bg.shoe.Draw()
+				if err != nil {
+					return fmt.Errorf("failed to deal card to %s: %w", player.Name(), err)
+				}
+				hand.DealCard(card)
 			}
-			player.DealCard(card)
 		}
 	}
 
@@ -160,11 +162,13 @@ func (bg *Game) DealInitialCards() error {
 	// Deal second card to each player
 	for _, player := range bg.players {
 		if player.IsActive() {
-			card, err := bg.shoe.Draw()
-			if err != nil {
-				return fmt.Errorf("failed to deal card to %s: %w", player.Name(), err)
+			for _, hand := range player.hands {
+				card, err := bg.shoe.Draw()
+				if err != nil {
+					return fmt.Errorf("failed to deal card to %s: %w", player.Name(), err)
+				}
+				hand.DealCard(card)
 			}
-			player.DealCard(card)
 		}
 	}
 
@@ -198,7 +202,7 @@ func (bg *Game) PlayerHit(playerName string) error {
 		return fmt.Errorf("failed to deal card: %w", err)
 	}
 
-	player.Hit(card)
+	player.CurrentHand().Hit(card)
 	return nil
 }
 
@@ -218,46 +222,7 @@ func (bg *Game) PlayerDoubleDownHit(playerName string) error {
 		return fmt.Errorf("failed to deal card: %w", err)
 	}
 
-	player.DoubleDownHit(card)
-	return nil
-}
-
-// PlayerSplit handles a player splitting their hand
-func (bg *Game) PlayerSplit(playerName string) error {
-	player := bg.GetPlayer(playerName)
-	if player == nil {
-		return fmt.Errorf("player %s not found", playerName)
-	}
-
-	if !player.IsActive() {
-		return fmt.Errorf("player %s is not active", playerName)
-	}
-
-	if !player.CanSplit() {
-		return fmt.Errorf("player %s cannot split", playerName)
-	}
-
-	// Split the hand
-	err := player.Split()
-	if err != nil {
-		return fmt.Errorf("failed to split hand: %w", err)
-	}
-
-	// Deal a second card to each of the split hands
-	hands := player.Hands()
-	for i := len(hands) - 2; i < len(hands); i++ { // Last two hands are the split hands
-		card, err := bg.shoe.Draw()
-		if err != nil {
-			return fmt.Errorf("failed to deal card to split hand: %w", err)
-		}
-
-		// Temporarily set the hand to add the card
-		originalHandIdx := player.GetCurrentHandIndex()
-		player.SetCurrentHandIndex(i)
-		player.Hit(card)
-		player.SetCurrentHandIndex(originalHandIdx)
-	}
-
+	player.CurrentHand().DoubleDownHit(card)
 	return nil
 }
 
@@ -287,6 +252,7 @@ func (bg *Game) PlayerStand(playerName string) error {
 // PlayerSurrender handles a player surrendering their current hand
 func (bg *Game) PlayerSurrender(playerName string) error {
 	player := bg.GetPlayer(playerName)
+	hand := player.CurrentHand()
 	if player == nil {
 		return fmt.Errorf("player %s not found", playerName)
 	}
@@ -295,12 +261,12 @@ func (bg *Game) PlayerSurrender(playerName string) error {
 		return fmt.Errorf("player %s is not active", playerName)
 	}
 
-	if !player.CanSurrender() {
+	if !hand.CanSurrender() {
 		return fmt.Errorf("player %s cannot surrender at this time", playerName)
 	}
 
 	// Surrender the current hand
-	player.Surrender()
+	hand.Surrender()
 
 	// Move to next active hand if available
 	if !player.MoveToNextActiveHand() {
@@ -326,8 +292,7 @@ func (bg *Game) DealerPlay() error {
 }
 
 // EvaluateHand determines the result of a player's hand against the dealer
-func (bg *Game) EvaluateHand(player *Player) GameResult {
-	playerHand := player.CurrentHand()
+func (bg *Game) EvaluateHand(playerHand *Hand) GameResult {
 	dealerHand := bg.dealer.Hand()
 
 	playerBlackjack := playerHand.IsBlackjack()
@@ -358,35 +323,25 @@ func (bg *Game) EvaluateHand(player *Player) GameResult {
 // PayoutResults handles payouts for all players
 func (bg *Game) PayoutResults() {
 	for _, player := range bg.players {
-		// Handle each hand separately using the new per-hand betting methods
-		hands := player.Hands()
-		originalHandIdx := player.GetCurrentHandIndex()
-
-		for handIdx := 0; handIdx < len(hands); handIdx++ {
+		for _, hand := range player.Hands() {
 			// Skip hands with no bet
-			if hands[handIdx].Bet() == 0 {
+			if hand.Bet() == 0 {
 				continue
 			}
 
-			// Temporarily set current hand for evaluation
-			player.SetCurrentHandIndex(handIdx)
-
-			result := bg.EvaluateHand(player)
+			result := bg.EvaluateHand(hand)
 
 			switch result {
 			case PlayerWin:
-				player.WinBetOnHand(handIdx, 1.0) // 1:1 payout
+				hand.WinBet(1.0) // 1:1 payout
 			case PlayerBlackjack:
-				player.WinBetOnHand(handIdx, 1.5) // 1.5:1 payout for blackjack
+				hand.WinBet(1.5) // 1.5:1 payout for blackjack
 			case Push:
-				player.PushBetOnHand(handIdx) // Return bet
+				hand.PushBet() // Return bet
 			case DealerWin, DealerBlackjack:
-				player.LoseBetOnHand(handIdx) // Lose bet
+				hand.LoseBet() // Lose bet
 			}
 		}
-
-		// Restore original hand index
-		player.SetCurrentHandIndex(originalHandIdx)
 	}
 }
 
