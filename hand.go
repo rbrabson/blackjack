@@ -430,7 +430,6 @@ func (h *Hand) Surrender() {
 	halfBet := currentBet / 2
 	h.player.chipManager.AddChips(halfBet)
 	h.SetWinnings(-halfBet) // Record the loss of half bet
-	h.SetBet(0)
 	h.RecordAction(ActionSurrender, fmt.Sprintf("received %d chips back", halfBet))
 	h.Stand()
 }
