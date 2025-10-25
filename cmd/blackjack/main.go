@@ -235,7 +235,7 @@ func playerTurns(game *blackjack.Game) {
 			for currentHand.IsActive() && !currentHand.IsBusted() && !currentHand.IsBlackjack() {
 				fmt.Print("Choose action: (h)it, (s)tand")
 
-				if player.CanDoubleDown(currentHand) {
+				if currentHand.CanDoubleDown() {
 					fmt.Print(", (d)ouble down")
 				}
 
@@ -275,12 +275,12 @@ func playerTurns(game *blackjack.Game) {
 					}
 
 				case "d", "double", "double down":
-					if !player.CanDoubleDown(currentHand) {
+					if !currentHand.CanDoubleDown() {
 						fmt.Println("Cannot double down.")
 						continue
 					}
 
-					err := player.DoubleDown(currentHand)
+					err := currentHand.DoubleDown()
 					if err != nil {
 						fmt.Printf("Error: %v\n", err)
 						continue

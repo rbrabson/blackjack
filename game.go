@@ -218,7 +218,7 @@ func (bg *Game) PlayerDoubleDownHit(playerName string) error {
 		return fmt.Errorf("failed to deal card: %w", err)
 	}
 
-	player.DoubleDownHit(player.CurrentHand(), card)
+	player.CurrentHand().DoubleDownHit(card)
 	return nil
 }
 

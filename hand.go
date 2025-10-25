@@ -337,7 +337,7 @@ func (h *Hand) CanDoubleDown() bool {
 }
 
 // DoubleDown performs the double down action on the hand
-func (h *Hand) DoubleDown(card cards.Card) error {
+func (h *Hand) DoubleDown() error {
 	if !h.CanDoubleDown() {
 		return fmt.Errorf("cannot double down on this hand")
 	}
@@ -348,18 +348,16 @@ func (h *Hand) DoubleDown(card cards.Card) error {
 		return fmt.Errorf("failed to deduct chips for double down: %v", err)
 	}
 
-	// Double the bet
 	h.bet *= 2
-
-	// Add the card to the hand
-	h.AddCardWithAction(card, ActionDouble, "double down")
-
-	// Mark hand as stood after double down
 	h.Stand()
-
 	h.RecordAction(ActionDouble, fmt.Sprintf("bet increased from %d to %d", h.bet/2, h.bet))
 
 	return nil
+}
+
+// DoubleDownHit adds a card to the player's hand as part of a double down
+func (h *Hand) DoubleDownHit(card cards.Card) {
+	h.AddCardWithAction(card, ActionDouble, "double down card")
 }
 
 // CanSplit returns true if the hand can be split (two cards of same rank)

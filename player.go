@@ -3,8 +3,6 @@ package blackjack
 import (
 	"fmt"
 	"strings"
-
-	"github.com/rbrabson/cards"
 )
 
 // Player represents a blackjack player
@@ -90,33 +88,6 @@ func (p *Player) IsActive() bool {
 // SetActive sets the player's active status
 func (p *Player) SetActive(active bool) {
 	p.active = active
-}
-
-// DoubleDownHit adds a card to the player's hand as part of a double down
-func (p *Player) DoubleDownHit(hand *Hand, card cards.Card) {
-	hand.AddCardWithAction(card, ActionDouble, "double down card")
-}
-
-// CanDoubleDown returns true if the player can double down
-func (p *Player) CanDoubleDown(hand *Hand) bool {
-	return hand.Count() == 2 && p.chipManager.HasEnoughChips(hand.Bet())
-}
-
-// DoubleDown doubles the player's bet and they get exactly one more card
-func (p *Player) DoubleDown(hand *Hand) error {
-	if !p.CanDoubleDown(hand) {
-		return fmt.Errorf("cannot double down")
-	}
-
-	currentBet := hand.Bet()
-	err := p.chipManager.DeductChips(currentBet)
-	if err != nil {
-		return err
-	}
-	newBet := currentBet * 2
-	hand.SetBet(newBet)
-	hand.RecordAction(ActionDouble, fmt.Sprintf("bet increased from %d to %d", currentBet, newBet))
-	return nil
 }
 
 // Split splits the player's hand into two hands

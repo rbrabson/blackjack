@@ -83,8 +83,8 @@ func demonstrateActionTracking() {
 	hand2.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Two})
 	hand2.PlaceBet(50)
 
-	player2.DoubleDown(hand2)
-	player2.DoubleDownHit(hand2, cards.Card{Suit: cards.Clubs, Rank: cards.Ten})
+	hand2.DoubleDown()
+	hand2.DoubleDownHit(cards.Card{Suit: cards.Clubs, Rank: cards.Ten})
 	fmt.Printf("Bob's Hand: %s\n", player2.CurrentHand().String())
 	fmt.Printf("Bob's Actions: %s\n", player2.CurrentHand().ActionSummary())
 
