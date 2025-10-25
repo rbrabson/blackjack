@@ -9,7 +9,7 @@ func TestGameAddPlayerWithChipManager(t *testing.T) {
 	game := New(1)
 
 	// Add a player with default chip manager
-	game.AddPlayer("Alice", 1000)
+	game.AddPlayer("Alice", WithChips(1000))
 	alice := game.GetPlayer("Alice")
 	if alice == nil {
 		t.Fatal("Alice not found in game")
@@ -20,7 +20,7 @@ func TestGameAddPlayerWithChipManager(t *testing.T) {
 
 	// Add a player with custom chip manager
 	customChipManager := &TrackingChipManager{chips: 500, operationCount: 0}
-	game.AddPlayer("Bob", 500, WithChipManager(customChipManager))
+	game.AddPlayer("Bob", WithChipManager(customChipManager), WithChips(500))
 	bob := game.GetPlayer("Bob")
 	if bob == nil {
 		t.Fatal("Bob not found in game")
@@ -51,7 +51,7 @@ func TestGameAddPlayerBackwardCompatibility(t *testing.T) {
 	game := New(1)
 
 	// This should work exactly as before
-	game.AddPlayer("Charlie", 750)
+	game.AddPlayer("Charlie", WithChips(750))
 	charlie := game.GetPlayer("Charlie")
 	if charlie == nil {
 		t.Fatal("Charlie not found in game")

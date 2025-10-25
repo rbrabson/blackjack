@@ -8,7 +8,7 @@ import (
 
 // TestPerHandBetting tests basic per-hand betting functionality
 func TestPerHandBetting(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 
 	// Test initial state
 	if player.Bet() != 0 {
@@ -53,7 +53,7 @@ func TestPerHandBetting(t *testing.T) {
 
 // TestPerHandBettingWithSplit tests betting with split hands
 func TestPerHandBettingWithSplit(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 
 	// Set up for split
 	card1 := cards.Card{Suit: cards.Spades, Rank: cards.Eight}
@@ -123,7 +123,7 @@ func TestPerHandBettingWithSplit(t *testing.T) {
 
 // TestPerHandBettingWithDoubleDown tests betting with double down
 func TestPerHandBettingWithDoubleDown(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 
 	// Set up for double down
 	card1 := cards.Card{Suit: cards.Spades, Rank: cards.Ten}
@@ -170,7 +170,7 @@ func TestPerHandBettingWithDoubleDown(t *testing.T) {
 
 // TestPerHandBettingSurrender tests betting with surrender
 func TestPerHandBettingSurrender(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 
 	// Set up for surrender
 	card1 := cards.Card{Suit: cards.Spades, Rank: cards.Ten}
@@ -202,7 +202,7 @@ func TestPerHandBettingSurrender(t *testing.T) {
 
 // TestPerHandBettingPush tests betting with push (tie)
 func TestPerHandBettingPush(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 
 	// Place bet
 	err := player.PlaceBet(100)

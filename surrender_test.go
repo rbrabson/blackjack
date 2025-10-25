@@ -8,7 +8,7 @@ import (
 
 // TestPlayerSurrender tests basic surrender functionality
 func TestPlayerSurrender(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 
 	// Set up a hand with two cards
 	card1 := cards.Card{Suit: cards.Spades, Rank: cards.Ten}
@@ -53,7 +53,7 @@ func TestPlayerSurrender(t *testing.T) {
 
 // TestPlayerCannotSurrenderAfterHit tests that surrender is not allowed after hitting
 func TestPlayerCannotSurrenderAfterHit(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 
 	// Set up a hand with two cards
 	card1 := cards.Card{Suit: cards.Spades, Rank: cards.Ten}
@@ -85,7 +85,7 @@ func TestPlayerCannotSurrenderAfterHit(t *testing.T) {
 
 // TestPlayerCannotSurrenderAfterStand tests that surrender is not allowed after standing
 func TestPlayerCannotSurrenderAfterStand(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 
 	// Set up a hand with two cards
 	card1 := cards.Card{Suit: cards.Spades, Rank: cards.Ten}
@@ -116,7 +116,7 @@ func TestPlayerCannotSurrenderAfterStand(t *testing.T) {
 
 // TestPlayerCannotSurrenderWhenBusted tests that surrender is not allowed when busted
 func TestPlayerCannotSurrenderWhenBusted(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 
 	// Set up a busted hand
 	card1 := cards.Card{Suit: cards.Spades, Rank: cards.Ten}
@@ -142,7 +142,7 @@ func TestPlayerCannotSurrenderWhenBusted(t *testing.T) {
 // TestGamePlayerSurrender tests surrender through the game interface
 func TestGamePlayerSurrender(t *testing.T) {
 	game := New(1)
-	game.AddPlayer("Alice", 1000)
+	game.AddPlayer("Alice", WithChips(1000))
 	alice := game.GetPlayer("Alice")
 
 	// Set up Alice with a surrenderable hand
@@ -191,7 +191,7 @@ func TestGamePlayerSurrenderInvalidPlayer(t *testing.T) {
 // TestGamePlayerSurrenderWhenCannotSurrender tests error handling when surrender is not allowed
 func TestGamePlayerSurrenderWhenCannotSurrender(t *testing.T) {
 	game := New(1)
-	game.AddPlayer("Bob", 1000)
+	game.AddPlayer("Bob", WithChips(1000))
 	bob := game.GetPlayer("Bob")
 
 	// Set up Bob with a hand that can't surrender (3 cards)
@@ -218,7 +218,7 @@ func TestGamePlayerSurrenderWhenCannotSurrender(t *testing.T) {
 
 // TestSurrenderWithMultipleHands tests surrender behavior with multiple hands (splits)
 func TestSurrenderWithMultipleHands(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 
 	// Set up multiple hands (simulate after a split)
 	card1 := cards.Card{Suit: cards.Spades, Rank: cards.Eight}

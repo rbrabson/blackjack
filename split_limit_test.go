@@ -8,7 +8,7 @@ import (
 
 // TestPlayerSplitLimit tests that a player can split up to 4 hands but no more
 func TestPlayerSplitLimit(t *testing.T) {
-	player := NewPlayer("TestPlayer", 10000) // Give plenty of chips
+	player := NewPlayer("TestPlayer", WithChips(10000)) // Give plenty of chips
 
 	// Set up the first hand with a pair that can be split
 	ace1 := cards.Card{Suit: cards.Spades, Rank: cards.Ace}
@@ -106,7 +106,7 @@ func TestPlayerSplitLimit(t *testing.T) {
 
 // TestPlayerSplitLimitWithInsufficientChips tests the split limit interaction with chip constraints
 func TestPlayerSplitLimitWithInsufficientChips(t *testing.T) {
-	player := NewPlayer("TestPlayer", 300) // Limited chips for only 2 additional splits
+	player := NewPlayer("TestPlayer", WithChips(300)) // Limited chips for only 2 additional splits
 
 	// Set up hand with a pair
 	king1 := cards.Card{Suit: cards.Spades, Rank: cards.King}
@@ -170,7 +170,7 @@ func TestPlayerSplitLimitWithInsufficientChips(t *testing.T) {
 
 // TestPlayerSplitLimitEdgeCases tests edge cases around the split limit
 func TestPlayerSplitLimitEdgeCases(t *testing.T) {
-	player := NewPlayer("TestPlayer", 10000)
+	player := NewPlayer("TestPlayer", WithChips(10000))
 
 	// Test that we can't split if current hand is not splittable
 	two1 := cards.Card{Suit: cards.Spades, Rank: cards.Two}

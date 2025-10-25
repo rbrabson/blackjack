@@ -68,14 +68,14 @@ func setupPlayers(game *blackjack.Game) {
 			continue
 		}
 
-		game.AddPlayer(name, chips)
+		game.AddPlayer(name, blackjack.WithChips(chips))
 		fmt.Printf("Added %s with %d chips.\n", name, chips)
 	}
 
 	if len(game.Players()) == 0 {
 		// Add a default player if none were added
 		fmt.Println("No players added. Adding default player 'Player1' with 1000 chips.")
-		game.AddPlayer("Player1", 1000)
+		game.AddPlayer("Player1", blackjack.WithChips(1000))
 	}
 }
 

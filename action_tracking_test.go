@@ -58,7 +58,7 @@ func TestActionTracking(t *testing.T) {
 
 // TestPlayerActionTracking tests action tracking through player methods
 func TestPlayerActionTracking(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 
 	// Deal initial cards
 	card1 := cards.Card{Suit: cards.Spades, Rank: cards.Ten}
@@ -105,7 +105,7 @@ func TestPlayerActionTracking(t *testing.T) {
 
 // TestSurrenderActionTracking tests surrender action tracking
 func TestSurrenderActionTracking(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 
 	// Set up a hand for surrender
 	card1 := cards.Card{Suit: cards.Spades, Rank: cards.Ten}
@@ -148,7 +148,7 @@ func TestSurrenderActionTracking(t *testing.T) {
 
 // TestDoubleDownActionTracking tests double down action tracking
 func TestDoubleDownActionTracking(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 
 	// Set up for double down
 	card1 := cards.Card{Suit: cards.Spades, Rank: cards.Ten}
@@ -201,7 +201,7 @@ func TestDoubleDownActionTracking(t *testing.T) {
 
 // TestSplitActionTracking tests split action tracking
 func TestSplitActionTracking(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 
 	// Set up for split
 	card1 := cards.Card{Suit: cards.Spades, Rank: cards.Eight}

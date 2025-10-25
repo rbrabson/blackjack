@@ -10,7 +10,7 @@ import (
 func TestFourSplitScenario(t *testing.T) {
 	// Create a game and add a player with plenty of chips
 	game := New(1)
-	game.AddPlayer("Alice", 10000)
+	game.AddPlayer("Alice", WithChips(10000))
 	alice := game.GetPlayer("Alice")
 
 	// Set up Alice with four aces (extremely rare but possible scenario)
@@ -132,7 +132,7 @@ func TestFourSplitScenario(t *testing.T) {
 // TestSplitLimitInGame tests the split limit within a game context
 func TestSplitLimitInGame(t *testing.T) {
 	game := New(1)
-	game.AddPlayer("Bob", 5000)
+	game.AddPlayer("Bob", WithChips(5000))
 	bob := game.GetPlayer("Bob")
 
 	// Clear Bob's hand and give him a splittable pair

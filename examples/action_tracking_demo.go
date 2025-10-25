@@ -12,7 +12,7 @@ func demonstrateActionTracking() {
 	fmt.Println("================================")
 
 	// Create a player and dealer
-	player := blackjack.NewPlayer("Alice", 1000)
+	player := blackjack.NewPlayer("Alice", blackjack.WithChips(1000))
 	dealer := blackjack.NewDealer()
 
 	// Simulate initial deal
@@ -77,7 +77,7 @@ func demonstrateActionTracking() {
 
 	// Double Down example
 	fmt.Println("\n💰 Double Down Example:")
-	player2 := blackjack.NewPlayer("Bob", 1000)
+	player2 := blackjack.NewPlayer("Bob", blackjack.WithChips(1000))
 	player2.DealCard(cards.Card{Suit: cards.Spades, Rank: cards.Nine})
 	player2.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Two})
 	player2.PlaceBet(50)
@@ -89,7 +89,7 @@ func demonstrateActionTracking() {
 
 	// Surrender example
 	fmt.Println("\n🏳️ Surrender Example:")
-	player3 := blackjack.NewPlayer("Charlie", 1000)
+	player3 := blackjack.NewPlayer("Charlie", blackjack.WithChips(1000))
 	player3.DealCard(cards.Card{Suit: cards.Spades, Rank: cards.Ten})
 	player3.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Six})
 	player3.PlaceBet(100)
@@ -100,7 +100,7 @@ func demonstrateActionTracking() {
 
 	// Split example
 	fmt.Println("\n✂️ Split Example:")
-	player4 := blackjack.NewPlayer("Diana", 1000)
+	player4 := blackjack.NewPlayer("Diana", blackjack.WithChips(1000))
 	player4.DealCard(cards.Card{Suit: cards.Spades, Rank: cards.Eight})
 	player4.DealCard(cards.Card{Suit: cards.Hearts, Rank: cards.Eight})
 	player4.PlaceBet(75)

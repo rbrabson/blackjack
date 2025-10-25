@@ -58,7 +58,7 @@ func TestHandValue(t *testing.T) {
 }
 
 func TestPlayerBetting(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 
 	// Test valid bet
 	err := player.PlaceBet(100)
@@ -127,7 +127,7 @@ func TestDealerRules(t *testing.T) {
 
 func TestGameEvaluation(t *testing.T) {
 	game := New(1)
-	game.AddPlayer("TestPlayer", 1000)
+	game.AddPlayer("TestPlayer", WithChips(1000))
 	player := game.GetPlayer("TestPlayer")
 	player.PlaceBet(100)
 
@@ -173,7 +173,7 @@ func TestGameEvaluation(t *testing.T) {
 func ExampleGame() {
 	// Create a game with 1 deck for predictable testing
 	game := New(1)
-	game.AddPlayer("Alice", 500)
+	game.AddPlayer("Alice", WithChips(500))
 
 	player := game.GetPlayer("Alice")
 	player.PlaceBet(50)
@@ -222,7 +222,7 @@ func TestHandSplit(t *testing.T) {
 }
 
 func TestPlayerSplit(t *testing.T) {
-	player := NewPlayer("TestPlayer", 1000)
+	player := NewPlayer("TestPlayer", WithChips(1000))
 	player.PlaceBet(100)
 
 	// Add pair of kings
@@ -266,7 +266,7 @@ func TestPlayerSplit(t *testing.T) {
 
 func TestGameSplit(t *testing.T) {
 	game := New(1)
-	game.AddPlayer("TestPlayer", 1000)
+	game.AddPlayer("TestPlayer", WithChips(1000))
 	player := game.GetPlayer("TestPlayer")
 
 	// Start a new round
@@ -298,7 +298,7 @@ func TestGameSplit(t *testing.T) {
 
 func TestSplitBetting(t *testing.T) {
 	game := New(1)
-	game.AddPlayer("TestPlayer", 1000)
+	game.AddPlayer("TestPlayer", WithChips(1000))
 	player := game.GetPlayer("TestPlayer")
 
 	game.StartNewRound()
@@ -340,7 +340,7 @@ func TestSplitLimitations(t *testing.T) {
 }
 
 func TestPlayerSplitInsufficientChips(t *testing.T) {
-	player := NewPlayer("TestPlayer", 100)
+	player := NewPlayer("TestPlayer", WithChips(100))
 	player.PlaceBet(100) // All chips
 
 	// Add pair of aces
@@ -359,7 +359,7 @@ func TestPlayerSplitInsufficientChips(t *testing.T) {
 }
 
 func TestSplitExample(t *testing.T) {
-	player := NewPlayer("Alice", 1000)
+	player := NewPlayer("Alice", WithChips(1000))
 	player.PlaceBet(50)
 
 	// Deal a pair of eights

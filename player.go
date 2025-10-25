@@ -17,7 +17,7 @@ type Player struct {
 }
 
 // NewPlayer creates a new player with the given name, initial chips, and optional settings
-func NewPlayer(name string, chips int, options ...Option) *Player {
+func NewPlayer(name string, options ...Option) *Player {
 	player := &Player{
 		name:           name,
 		hands:          []*Hand{NewHand()},
@@ -28,7 +28,6 @@ func NewPlayer(name string, chips int, options ...Option) *Player {
 	for _, option := range options {
 		option(player)
 	}
-	player.chipManager.SetChips(chips)
 	return player
 }
 
