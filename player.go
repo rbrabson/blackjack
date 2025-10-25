@@ -144,7 +144,7 @@ func (p *Player) HasActiveHands() bool {
 	}
 
 	for _, hand := range p.hands {
-		if !hand.IsBusted() && !hand.IsBlackjack() && !hand.IsStood() {
+		if !(hand.IsBusted() || hand.IsBlackjack() || hand.IsStood() || hand.IsSurrendered()) {
 			return true
 		}
 	}
@@ -154,7 +154,7 @@ func (p *Player) HasActiveHands() bool {
 // MoveToNextActiveHand moves to the next active hand, returns true if successful
 func (p *Player) MoveToNextActiveHand() bool {
 	for idx, hand := range p.hands {
-		if !hand.IsBusted() && !hand.IsBlackjack() && !hand.IsStood() {
+		if !(hand.IsBusted() || hand.IsBlackjack() || hand.IsStood() || hand.IsSurrendered()) {
 			p.currentHandIdx = idx
 			return true
 		}
