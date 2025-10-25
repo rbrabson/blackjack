@@ -92,25 +92,6 @@ func (p *Player) SetActive(active bool) {
 	p.active = active
 }
 
-// WinBet adds winnings to the player's chips for the current hand
-func (p *Player) WinBet(hand *Hand, multiplier float64) {
-	winnings := int(float64(hand.Bet()) * multiplier)
-	totalPayout := hand.Bet() + winnings
-	p.chipManager.AddChips(totalPayout)
-	hand.SetWinnings(winnings)
-}
-
-// LoseBet removes the player's bet for the current hand (already deducted when placed)
-func (p *Player) LoseBet(hand *Hand) {
-	hand.SetWinnings(-hand.Bet()) // Record the loss
-}
-
-// PushBet returns the bet to the player for the current hand (tie)
-func (p *Player) PushBet(hand *Hand) {
-	p.chipManager.AddChips(hand.Bet())
-	hand.SetWinnings(0) // No win or loss
-}
-
 // Surrender allows the player to forfeit their hand and lose half their bet
 func (p *Player) Surrender(hand *Hand) {
 	currentBet := hand.Bet()

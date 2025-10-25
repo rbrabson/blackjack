@@ -79,7 +79,7 @@ func main() {
 		fmt.Printf("Error placing 300 chip bet: %v\n", err)
 	} else {
 		fmt.Printf("Successfully placed 300 chip bet. Remaining chips: %d\n", bob.Chips())
-		bob.LoseBet(bob.CurrentHand()) // Simulate losing the bet
+		bobHand.LoseBet() // Simulate losing the bet
 	}
 
 	// This should fail (exceeds daily limit)

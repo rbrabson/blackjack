@@ -367,13 +367,13 @@ func (bg *Game) PayoutResults() {
 
 			switch result {
 			case PlayerWin:
-				player.WinBet(hand, 1.0) // 1:1 payout
+				hand.WinBet(1.0) // 1:1 payout
 			case PlayerBlackjack:
-				player.WinBet(hand, 1.5) // 1.5:1 payout for blackjack
+				hand.WinBet(1.5) // 1.5:1 payout for blackjack
 			case Push:
-				player.PushBet(hand) // Return bet
+				hand.PushBet() // Return bet
 			case DealerWin, DealerBlackjack:
-				player.LoseBet(hand) // Lose bet
+				hand.LoseBet() // Lose bet
 			}
 		}
 	}

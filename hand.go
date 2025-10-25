@@ -203,6 +203,25 @@ func (h *Hand) PlaceBet(amount int) error {
 	return h.player.chipManager.DeductChips(amount)
 }
 
+// WinBet adds winnings to the player's chips for the current hand
+func (h *Hand) WinBet(multiplier float64) {
+	winnings := int(float64(h.Bet()) * multiplier)
+	totalPayout := h.Bet() + winnings
+	h.player.chipManager.AddChips(totalPayout)
+	h.SetWinnings(winnings)
+}
+
+// LoseBet removes the player's bet for the current hand (already deducted when placed)
+func (h *Hand) LoseBet() {
+	h.SetWinnings(-h.Bet()) // Record the loss
+}
+
+// PushBet returns the bet to the player for the current hand (tie)
+func (h *Hand) PushBet() {
+	h.player.chipManager.AddChips(h.Bet())
+	h.SetWinnings(0) // No win or loss
+}
+
 // IsBusted returns true if the hand value is over 21
 func (h *Hand) IsBusted() bool {
 	return h.Value() > 21
