@@ -171,7 +171,7 @@ func (p *Player) GetAllHandValues() []int {
 	return values
 }
 
-// GetCurrentHandIndex returns the index of the current hand
-func (p *Player) GetCurrentHandIndex() int {
+// GetCurrentHandNumber returns the index of the current hand
+func (p *Player) GetCurrentHandNumber() int {
 	return p.currentHandIdx
 }

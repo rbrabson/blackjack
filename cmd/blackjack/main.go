@@ -212,7 +212,7 @@ func playerTurns(game *blackjack.Game) {
 
 			// Check for player blackjack
 			if currentHand.IsBlackjack() {
-				fmt.Printf("🎯 %s has blackjack on hand %d!\n", player.Name(), player.GetCurrentHandIndex()+1)
+				fmt.Printf("🎯 %s has blackjack on hand %d!\n", player.Name(), player.GetCurrentHandNumber()+1)
 				if !player.MoveToNextActiveHand() {
 					player.SetActive(false)
 					break
@@ -224,7 +224,7 @@ func playerTurns(game *blackjack.Game) {
 			if len(player.Hands()) > 1 {
 				fmt.Printf("\n%s - Hand %d of %d: %s\n",
 					player.Name(),
-					player.GetCurrentHandIndex()+1,
+					player.GetCurrentHandNumber()+1,
 					len(player.Hands()),
 					currentHand.String())
 			} else {
