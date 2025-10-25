@@ -307,6 +307,8 @@ func (bg *Game) EvaluateHand(playerHand *Hand) GameResult {
 		return PlayerBlackjack
 	case dealerBlackjack:
 		return DealerBlackjack
+	case playerHand.IsSurrendered():
+		return DealerWin
 	case playerHand.IsBusted():
 		return DealerWin
 	case dealerHand.IsBusted():

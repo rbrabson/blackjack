@@ -438,6 +438,7 @@ func (h *Hand) Surrender() {
 	h.SetWinnings(-halfBet) // Record the loss of half bet
 	h.RecordAction(ActionSurrender, fmt.Sprintf("received %d chips back", halfBet))
 	h.Stand()
+	h.isSurrendered = true
 }
 
 // String returns a string representation of the hand
