@@ -142,11 +142,13 @@ func (bg *Game) DealInitialCards() error {
 	// Deal first card to each player
 	for _, player := range bg.players {
 		if player.IsActive() {
-			card, err := bg.shoe.Draw()
-			if err != nil {
-				return fmt.Errorf("failed to deal card to %s: %w", player.Name(), err)
+			for _, hand := range player.hands {
+				card, err := bg.shoe.Draw()
+				if err != nil {
+					return fmt.Errorf("failed to deal card to %s: %w", player.Name(), err)
+				}
+				hand.DealCard(card)
 			}
-			player.CurrentHand().DealCard(card)
 		}
 	}
 
@@ -160,11 +162,13 @@ func (bg *Game) DealInitialCards() error {
 	// Deal second card to each player
 	for _, player := range bg.players {
 		if player.IsActive() {
-			card, err := bg.shoe.Draw()
-			if err != nil {
-				return fmt.Errorf("failed to deal card to %s: %w", player.Name(), err)
+			for _, hand := range player.hands {
+				card, err := bg.shoe.Draw()
+				if err != nil {
+					return fmt.Errorf("failed to deal card to %s: %w", player.Name(), err)
+				}
+				hand.DealCard(card)
 			}
-			player.CurrentHand().DealCard(card)
 		}
 	}
 
