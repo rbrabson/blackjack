@@ -30,14 +30,15 @@ type Action struct {
 
 // Hand represents a hand of cards in blackjack
 type Hand struct {
-	cards    []cards.Card // cards are the game cards in the hand
-	isSplit  bool         // Whether this hand came from a split
-	isActive bool         // Whether this hand is still being played
-	isStood  bool         // Whether the player has stood on this hand
-	actions  []Action     // All actions taken on this hand
-	bet      int          // The bet amount for this specific hand
-	winnings int          // The winnings for this specific hand (can be negative for losses)
-	player   *Player      // The player who owns this hand (nil for dealer)
+	cards         []cards.Card // cards are the game cards in the hand
+	isSplit       bool         // Whether this hand came from a split
+	isActive      bool         // Whether this hand is still being played
+	isStood       bool         // Whether the player has stood on this hand
+	isSurrendered bool         // Whether the player has surrendered this hand
+	actions       []Action     // All actions taken on this hand
+	bet           int          // The bet amount for this specific hand
+	winnings      int          // The winnings for this specific hand (can be negative for losses)
+	player        *Player      // The player who owns this hand (nil for dealer)
 }
 
 // NewDealerHand creates a new dealer hand without a chip manager
@@ -417,6 +418,11 @@ func (h *Hand) splitHand() *Hand {
 	newHand := newSplitHand(secondCard, h.player)
 
 	return newHand
+}
+
+// IsSurrendered returns true if the hand has been surrendered
+func (h *Hand) IsSurrendered() bool {
+	return h.isSurrendered
 }
 
 // CanSurrender returns true if the player can surrender (typically only on first two cards)
