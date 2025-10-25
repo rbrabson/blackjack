@@ -30,14 +30,14 @@ type Action struct {
 
 // Hand represents a hand of cards in blackjack
 type Hand struct {
-	cards       []cards.Card // cards are the game cards in the hand
-	isSplit     bool         // Whether this hand came from a split
-	isActive    bool         // Whether this hand is still being played
-	isStood     bool         // Whether the player has stood on this hand
-	actions     []Action     // All actions taken on this hand
-	bet         int          // The bet amount for this specific hand
-	winnings    int          // The winnings for this specific hand (can be negative for losses)
-	chipManager ChipManager  // Interface to manage chips for this hand
+	cards    []cards.Card // cards are the game cards in the hand
+	isSplit  bool         // Whether this hand came from a split
+	isActive bool         // Whether this hand is still being played
+	isStood  bool         // Whether the player has stood on this hand
+	actions  []Action     // All actions taken on this hand
+	bet      int          // The bet amount for this specific hand
+	winnings int          // The winnings for this specific hand (can be negative for losses)
+	player   *Player      // The player who owns this hand (nil for dealer)
 }
 
 // NewDealerHand creates a new dealer hand without a chip manager
@@ -46,22 +46,22 @@ func NewDealerHand() *Hand {
 }
 
 // NewHand creates a new empty hand
-func NewHand(chipManager ChipManager) *Hand {
+func NewHand(player *Player) *Hand {
 	return &Hand{
-		cards:       make([]cards.Card, 0, 2),
-		isSplit:     false,
-		isActive:    true,
-		isStood:     false,
-		actions:     make([]Action, 0, 1),
-		bet:         0,
-		winnings:    0,
-		chipManager: chipManager,
+		cards:    make([]cards.Card, 0, 2),
+		isSplit:  false,
+		isActive: true,
+		isStood:  false,
+		actions:  make([]Action, 0, 1),
+		bet:      0,
+		winnings: 0,
+		player:   player,
 	}
 }
 
 // NewSplitHand creates a new hand from a split with the initial card
-func NewSplitHand(card cards.Card, chipManager ChipManager) *Hand {
-	h := NewHand(chipManager)
+func NewSplitHand(card cards.Card, player *Player) *Hand {
+	h := NewHand(player)
 	h.isSplit = true
 	h.AddCardWithAction(card, ActionDeal, "split card")
 
@@ -289,7 +289,7 @@ func (h *Hand) Stand() {
 
 // CanDoubleDown returns true if the hand can be doubled down
 func (h *Hand) CanDoubleDown() bool {
-	return len(h.cards) == 2 && h.chipManager != nil && h.chipManager.HasEnoughChips(h.bet)
+	return len(h.cards) == 2 && h.player.chipManager != nil && h.player.chipManager.HasEnoughChips(h.bet)
 }
 
 // DoubleDown performs the double down action on the hand
@@ -299,7 +299,7 @@ func (h *Hand) DoubleDown(card cards.Card) error {
 	}
 
 	// Deduct additional bet from chip manager
-	err := h.chipManager.DeductChips(h.bet)
+	err := h.player.chipManager.DeductChips(h.bet)
 	if err != nil {
 		return fmt.Errorf("failed to deduct chips for double down: %v", err)
 	}
@@ -340,7 +340,7 @@ func (h *Hand) SplitHand() *Hand {
 	h.isSplit = true
 
 	// Create new hand with the second card
-	newHand := NewSplitHand(secondCard, h.chipManager)
+	newHand := NewSplitHand(secondCard, h.player)
 
 	return newHand
 }

@@ -27,7 +27,7 @@ func NewPlayer(name string, options ...Option) *Player {
 	for _, option := range options {
 		option(player)
 	}
-	player.hands = []*Hand{NewHand(player.chipManager)}
+	player.hands = []*Hand{NewHand(player)}
 	return player
 }
 
@@ -223,7 +223,7 @@ func (p *Player) CanSplit(hand *Hand) bool {
 // ClearHand clears all of the player's hands for a new round
 func (p *Player) ClearHand() {
 	// Reset to a single hand
-	p.hands = []*Hand{NewHand(p.chipManager)}
+	p.hands = []*Hand{NewHand(p)}
 	p.currentHandIdx = 0
 }
 
