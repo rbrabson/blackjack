@@ -59,8 +59,8 @@ func NewHand(player *Player) *Hand {
 	}
 }
 
-// NewSplitHand creates a new hand from a split with the initial card
-func NewSplitHand(card cards.Card, player *Player) *Hand {
+// newSplitHand creates a new hand from a split with the initial card
+func newSplitHand(card cards.Card, player *Player) *Hand {
 	h := NewHand(player)
 	h.isSplit = true
 	h.AddCardWithAction(card, ActionDeal, "split card")
@@ -414,7 +414,7 @@ func (h *Hand) splitHand() *Hand {
 	h.isSplit = true
 
 	// Create new hand with the second card
-	newHand := NewSplitHand(secondCard, h.player)
+	newHand := newSplitHand(secondCard, h.player)
 
 	return newHand
 }
