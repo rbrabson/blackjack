@@ -185,7 +185,7 @@ func placeBets(game *blackjack.Game) bool {
 	hasActivePlayers := false
 	for _, player := range game.Players() {
 		hand := player.CurrentHand()
-		if player.IsActive() && player.Bet(hand) > 0 {
+		if player.IsActive() && hand.Bet() > 0 {
 			hasActivePlayers = true
 			break
 		}
@@ -199,7 +199,7 @@ func playerTurns(game *blackjack.Game) {
 
 	for _, player := range game.Players() {
 		hand := player.CurrentHand()
-		if !player.IsActive() || player.Bet(hand) == 0 {
+		if !player.IsActive() || hand.Bet() == 0 {
 			continue
 		}
 
@@ -354,7 +354,7 @@ func playerTurns(game *blackjack.Game) {
 func hasActiveNonBustedPlayers(game *blackjack.Game) bool {
 	for _, player := range game.Players() {
 		hand := player.CurrentHand()
-		if player.Bet(hand) > 0 && !hand.IsBusted() {
+		if hand.Bet() > 0 && !hand.IsBusted() {
 			return true
 		}
 	}

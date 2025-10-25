@@ -82,11 +82,6 @@ func (p *Player) AddChips(amount int) {
 	p.chipManager.AddChips(amount)
 }
 
-// Bet returns the player's current hand bet
-func (p *Player) Bet(hand *Hand) int {
-	return hand.Bet()
-}
-
 // IsActive returns whether the player is still active in the game
 func (p *Player) IsActive() bool {
 	return p.active
