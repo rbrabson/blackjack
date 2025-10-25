@@ -81,7 +81,7 @@ func demonstrateActionTracking() {
 	player2 := blackjack.NewPlayer("Bob", blackjack.WithChips(1000))
 	hand2 := player2.CurrentHand()
 	player2.DealCard(hand2, cards.Card{Suit: cards.Hearts, Rank: cards.Two})
-	player2.PlaceBet(hand2, 50)
+	hand2.PlaceBet(50)
 
 	player2.DoubleDown(hand2)
 	player2.DoubleDownHit(hand2, cards.Card{Suit: cards.Clubs, Rank: cards.Ten})
@@ -94,7 +94,7 @@ func demonstrateActionTracking() {
 	hand3 := player3.CurrentHand()
 	player3.DealCard(hand3, cards.Card{Suit: cards.Spades, Rank: cards.Ten})
 	player3.DealCard(hand3, cards.Card{Suit: cards.Hearts, Rank: cards.Six})
-	player3.PlaceBet(hand3, 100)
+	hand3.PlaceBet(100)
 
 	player3.Surrender(hand3)
 	fmt.Printf("Charlie's Hand: %s\n", player3.CurrentHand().String())
@@ -106,7 +106,7 @@ func demonstrateActionTracking() {
 	hand4 := player4.CurrentHand()
 	player4.DealCard(hand4, cards.Card{Suit: cards.Spades, Rank: cards.Eight})
 	player4.DealCard(hand4, cards.Card{Suit: cards.Hearts, Rank: cards.Eight})
-	player4.PlaceBet(hand4, 75)
+	hand4.PlaceBet(75)
 
 	player4.Split(hand4)
 	fmt.Printf("Diana's Hand 1: %s\n", player4.Hands()[0].String())
