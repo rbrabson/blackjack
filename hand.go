@@ -317,6 +317,9 @@ func (h *Hand) Hit(card cards.Card) {
 		// If the hand is a split aces hand, automatically stand after one hit
 		h.Stand()
 	}
+	if h.Value() == 21 {
+		h.Stand()
+	}
 }
 
 // DealCard adds a card to the player's hand as part of the initial deal
