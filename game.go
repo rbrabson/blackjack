@@ -226,6 +226,29 @@ func (bg *Game) PlayerDoubleDownHit(playerName string) error {
 	return nil
 }
 
+// PlayerSplit processes a split action for the specified player.
+func (bg *Game) PlayerSplit(playerName string) error {
+	player := bg.GetPlayer(playerName)
+	if player == nil {
+		return fmt.Errorf("player %s not found", playerName)
+	}
+	if err := player.CurrentHand().Split(); err != nil {
+		return err
+	}
+
+	// Deal one card to each of the new split hands
+	hands := player.Hands()
+	for _, splitHand := range hands[len(hands)-2:] {
+		card, err := bg.Shoe().Draw()
+		if err != nil {
+			return fmt.Errorf("failed to deal card to split hand for player %s: %w", playerName, err)
+		}
+		splitHand.DealCard(card)
+	}
+
+	return nil
+}
+
 // PlayerStand handles a player standing on their current hand
 func (bg *Game) PlayerStand(playerName string) error {
 	player := bg.GetPlayer(playerName)
