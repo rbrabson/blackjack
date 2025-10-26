@@ -313,6 +313,10 @@ func (h *Hand) SetActive(active bool) {
 func (h *Hand) Hit(card cards.Card) {
 	// Use AddCardWithAction to specify this is a hit
 	h.AddCardWithAction(card, ActionHit, "player hit")
+	if h.IsSplit() && h.cards[1].Rank == cards.Ace {
+		// If the hand is a split aces hand, automatically stand after one hit
+		h.Stand()
+	}
 }
 
 // DealCard adds a card to the player's hand as part of the initial deal

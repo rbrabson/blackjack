@@ -243,7 +243,7 @@ func (bg *Game) PlayerSplit(playerName string) error {
 		if err != nil {
 			return fmt.Errorf("failed to deal card to split hand for player %s: %w", playerName, err)
 		}
-		splitHand.DealCard(card)
+		splitHand.Hit(card)
 	}
 
 	return nil
