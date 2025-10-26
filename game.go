@@ -349,8 +349,8 @@ func (bg *Game) EvaluateHand(playerHand *Hand) GameResult {
 func (bg *Game) PayoutResults() {
 	for _, player := range bg.players {
 		for _, hand := range player.Hands() {
-			// Skip hands with no bet
-			if hand.Bet() == 0 {
+			// Skip hands with no bet or already settled
+			if hand.Bet() == 0 || hand.Winnings() != 0 {
 				continue
 			}
 
