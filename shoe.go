@@ -31,7 +31,7 @@ func NewShoe(numDecks int) *Shoe {
 // Draw deals a card from the shoe
 func (s *Shoe) Draw() (cards.Card, error) {
 	if s.IsEmpty() {
-		return cards.Card{}, fmt.Errorf("shoe is empty")
+		s.Reshuffle()
 	}
 
 	return s.cards.Draw(), nil
